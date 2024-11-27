@@ -1,0 +1,9 @@
+﻿function(add_test_case test_name test_file)
+    add_executable(${test_name} ${test_file})
+    target_include_directories(${test_name} PRIVATE include)
+    target_link_libraries(${test_name} PUBLIC ${PROJECT_NAME})
+    set_compile_options(${test_name})
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endfunction()
+
+add_test_case(core.dynamic_array_tests src/core/dynamic_array_tests.c)
