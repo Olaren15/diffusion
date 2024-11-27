@@ -22,6 +22,7 @@ add_library(
         src/core/dynamic_array.c
         src/platform/win32/window.c
         src/platform/vulkan.c
+        src/platform/win32/win32_utils.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 

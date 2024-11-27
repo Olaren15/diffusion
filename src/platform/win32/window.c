@@ -2,14 +2,14 @@
 
 #ifdef WIN32
 
-#define WIN32_LEAN__AND_MEAN
-
 #include "event.h"
+#include "platform/win32/win32_types.h"
+#include "platform/win32/win32_utils.h"
 #include "project.h"
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <Windows.h>
+#include <stdlib.h>
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
@@ -18,6 +18,8 @@
 struct platform_window_s {
     HINSTANCE instance;
     HWND window;
+    wchar_t* window_class_name_w;
+    wchar_t* window_title_w;
 };
 
 typedef HRESULT (*DwmSetWindowAttribute_fn)(HWND, DWORD, LPCVOID, DWORD);
@@ -27,23 +29,26 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
 static event_t latest_event;
 
 bool window_create(const char* title, int width, int height, window_t* window) {
+    wchar_t* window_title_w = win32_create_wide_string_from_uti8_string(title);
+    wchar_t* window_class_name_w = win32_create_wide_string_from_uti8_string(PROJECT_NAME);
+
     HINSTANCE instance;
-    if (!GetModuleHandleEx(0, NULL, &instance)) {
+    if (!GetModuleHandleExW(0, NULL, &instance)) {
         return false;
     }
 
-    HICON icon = LoadImage(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+    HICON icon = LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
     if (icon == NULL) {
         return false;
     }
 
-    HCURSOR cursor = LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+    HCURSOR cursor = LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
     if (cursor == NULL) {
         return false;
     }
 
-    WNDCLASSEX window_class = {
-      .cbSize = sizeof(WNDCLASSEX),
+    WNDCLASSEXW window_class = {
+      .cbSize = sizeof(WNDCLASSEXW),
       .style = 0,
       .lpfnWndProc = window_callback,
       .cbClsExtra = 0,
@@ -53,7 +58,7 @@ bool window_create(const char* title, int width, int height, window_t* window) {
       .hCursor = cursor,
       .hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH),
       .lpszMenuName = NULL,
-      .lpszClassName = PROJECT_NAME,
+      .lpszClassName = window_class_name_w,
       .hIconSm = icon,
     };
     if (RegisterClassEx(&window_class) == 0) {
@@ -65,9 +70,10 @@ bool window_create(const char* title, int width, int height, window_t* window) {
     int position_x = (primary_screen_width / 2) - (width / 2);
     int position_y = (primary_screen_height / 2) - (height / 2);
 
-    HWND window_handle = CreateWindow(
-      PROJECT_NAME,
-      title,
+    HWND window_handle = CreateWindowExW(
+      0,
+      window_class_name_w,
+      window_title_w,
       WS_OVERLAPPEDWINDOW | WS_VISIBLE,
       position_x,
       position_y,
@@ -82,7 +88,7 @@ bool window_create(const char* title, int width, int height, window_t* window) {
         return false;
     }
 
-    HINSTANCE dwmapi_lib = LoadLibrary("dwmapi.dll");
+    HINSTANCE dwmapi_lib = LoadLibraryW(L"dwmapi.dll");
     if (dwmapi_lib != NULL) {
         DwmSetWindowAttribute_fn DwmSetWindowAttribute_function = (DwmSetWindowAttribute_fn
         )GetProcAddress(dwmapi_lib, "DwmSetWindowAttribute");
@@ -99,8 +105,14 @@ bool window_create(const char* title, int width, int height, window_t* window) {
     ShowWindow(window_handle, SW_SHOWNORMAL);
 
     platform_window_t* platform_window = malloc(sizeof(platform_window_t));
+    if (platform_window == NULL) {
+        return false;
+    }
+
     platform_window->instance = instance;
     platform_window->window = window_handle;
+    platform_window->window_class_name_w = window_class_name_w;
+    platform_window->window_title_w = window_title_w;
     window->platform_window = platform_window;
 
     return true;
@@ -109,15 +121,17 @@ bool window_create(const char* title, int width, int height, window_t* window) {
 void window_destroy(window_t* self) {
     DestroyWindow(self->platform_window->window);
     FreeLibrary(self->platform_window->instance);
+    free(self->platform_window->window_title_w);
+    free(self->platform_window->window_class_name_w);
     free(self->platform_window);
 }
 
 bool window_poll_event(const window_t* self, event_t* event) {
     MSG message;
-    BOOL message_received = PeekMessage(&message, self->platform_window->window, 0, 0, PM_REMOVE);
+    BOOL message_received = PeekMessageW(&message, self->platform_window->window, 0, 0, PM_REMOVE);
 
     TranslateMessage(&message);
-    DispatchMessage(&message);
+    DispatchMessageW(&message);
 
     *event = latest_event;
     return message_received;

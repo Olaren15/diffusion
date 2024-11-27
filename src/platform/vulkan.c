@@ -1,13 +1,10 @@
 ﻿#include "platform/vulkan.h"
 
 #ifdef WIN32
-// clang-format off
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <vulkan/vulkan_win32.h>
-// clang-format on
-#endif
+#include "platform/win32/win32_types.h"
 
+#include <vulkan/vulkan_win32.h>
+#endif
 
 static void* loaded_library = NULL;
 
