@@ -1,33 +1,28 @@
 ﻿#include "renderer.h"
 
 #include "core/dynamic_array.h"
+#include "platform/vulkan.h"
 #include "project.h"
-
-#include <vulkan/vulkan.h>
-
-static const char* vk_surface_extension_name = VK_KHR_SURFACE_EXTENSION_NAME;
-#ifdef WIN32
-// clang-format off
-#include <Windows.h>
-#include <vulkan/vulkan_win32.h>
-// clang-format on
-static const char* vk_platform_surface_extension_name = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
-#else
-#error Please define the platform-dependent vulkan surface extension name for your platform
-#endif
 
 static bool renderer_create_vk_instance(renderer_t* self);
 
 bool renderer_init(renderer_t* self) {
+    if (!vulkan_load_global_functions()) {
+        return false;
+    }
+
     if (!renderer_create_vk_instance(self)) {
         return false;
     }
+
+    vulkan_load_instance_functions(self->vk_instance);
 
     return true;
 }
 
 void renderer_destroy(renderer_t* self) {
     vkDestroyInstance(self->vk_instance, NULL);
+    vulkan_release_functions();
 }
 
 void renderer_render(const renderer_t* self) {
@@ -47,10 +42,7 @@ static bool renderer_create_vk_instance(renderer_t* self) {
       .apiVersion = VK_MAKE_API_VERSION(1, 0, 0, 0)
     };
 
-    dynamic_array_t enabled_extensions = dynamic_array_allocate(sizeof(char*));
-    dynamic_array_push(&enabled_extensions, &vk_surface_extension_name);
-    dynamic_array_push(&enabled_extensions, &vk_platform_surface_extension_name);
-
+    dynamic_array_t enabled_extensions = vulkan_get_required_extensions_for_presentation();
     VkInstanceCreateInfo instance_create_info = {
       .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
       .pApplicationInfo = &application_info,
@@ -62,6 +54,8 @@ static bool renderer_create_vk_instance(renderer_t* self) {
     if (result != VK_SUCCESS) {
         return false;
     }
+
+    dynamic_array_free(&enabled_extensions);
 
     return true;
 }

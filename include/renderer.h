@@ -1,8 +1,9 @@
 ﻿#ifndef DIFFUSION_RENDERER_H
 #define DIFFUSION_RENDERER_H
 
+#include "platform/vulkan.h"
+
 #include <stdbool.h>
-#include <vulkan/vulkan.h>
 
 typedef struct renderer_s {
     VkInstance vk_instance;

@@ -21,12 +21,13 @@ add_library(
         src/engine.c
         src/core/dynamic_array.c
         src/platform/win32/window.c
+        src/platform/vulkan.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # Dependencies
 find_package(Vulkan REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC Vulkan::Vulkan)
+target_link_libraries(${PROJECT_NAME} PUBLIC Vulkan::Headers)
 
 add_subdirectory(standalone)
 
