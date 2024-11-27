@@ -22,7 +22,7 @@ typedef struct window_s {
  *
  * @returns true on success or false on failure
  */
-bool window_create(const char* title, uint32_t width, uint32_t height, window_t* window);
+bool window_create(const char* title, int width, int height, window_t* window);
 
 /**
  * Destroy a platform-specific window

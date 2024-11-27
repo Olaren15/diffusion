@@ -26,7 +26,7 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
 
 static event_t latest_event;
 
-bool window_create(const char* title, uint32_t width, uint32_t height, window_t* window) {
+bool window_create(const char* title, int width, int height, window_t* window) {
     HINSTANCE instance;
     if (!GetModuleHandleEx(0, NULL, &instance)) {
         return false;
@@ -60,14 +60,19 @@ bool window_create(const char* title, uint32_t width, uint32_t height, window_t*
         return false;
     }
 
+    int primary_screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int primary_screen_height = GetSystemMetrics(SM_CYSCREEN);
+    int position_x = (primary_screen_width / 2) - (width / 2);
+    int position_y = (primary_screen_height / 2) - (height / 2);
+
     HWND window_handle = CreateWindow(
       PROJECT_NAME,
       title,
       WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-      CW_USEDEFAULT,
-      SW_SHOWNORMAL,
-      (int)width,
-      (int)height,
+      position_x,
+      position_y,
+      width,
+      height,
       NULL,
       NULL,
       instance,
@@ -90,6 +95,8 @@ bool window_create(const char* title, uint32_t width, uint32_t height, window_t*
 
         FreeLibrary(dwmapi_lib);
     }
+
+    ShowWindow(window_handle, SW_SHOWNORMAL);
 
     platform_window_t* platform_window = malloc(sizeof(platform_window_t));
     platform_window->instance = instance;
