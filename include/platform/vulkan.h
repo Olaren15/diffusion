@@ -35,7 +35,7 @@ void vulkan_release_functions(void);
  *
  * @returns A dynamic array of `const char*` containing the extension names
  */
-dynamic_array_t vulkan_get_required_extensions_for_presentation();
+dynamic_array_t vulkan_get_required_extensions_for_presentation(void);
 
 // Global functions
 extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;

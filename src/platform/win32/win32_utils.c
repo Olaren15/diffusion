@@ -6,7 +6,7 @@
 
 wchar_t* win32_create_wide_string_from_uti8_string(const char* utf8_string) {
     int wide_string_character_count = MultiByteToWideChar(CP_UTF8, 0, utf8_string, -1, NULL, 0);
-    wchar_t* wide_string = malloc(wide_string_character_count * sizeof(wchar_t));
+    wchar_t* wide_string = malloc(((size_t)wide_string_character_count) * sizeof(wchar_t));
     if (wide_string == NULL) {
         abort();
     }

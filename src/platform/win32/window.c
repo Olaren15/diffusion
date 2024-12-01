@@ -90,7 +90,7 @@ bool window_create(const char* title, int width, int height, window_t* window) {
 
     HINSTANCE dwmapi_lib = LoadLibraryW(L"dwmapi.dll");
     if (dwmapi_lib != NULL) {
-        DwmSetWindowAttribute_fn DwmSetWindowAttribute_function = (DwmSetWindowAttribute_fn
+        DwmSetWindowAttribute_fn DwmSetWindowAttribute_function = (DwmSetWindowAttribute_fn)(void (*)(void)
         )GetProcAddress(dwmapi_lib, "DwmSetWindowAttribute");
         if (DwmSetWindowAttribute_function != NULL) {
             BOOL allow_immersive_dark_mode = TRUE;

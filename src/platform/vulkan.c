@@ -15,7 +15,7 @@ bool vulkan_load_global_functions(void) {
         return false;
     }
 
-    vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)GetProcAddress(library, "vkGetInstanceProcAddr");
+    vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(library, "vkGetInstanceProcAddr");
     loaded_library = library;
 #endif
 
@@ -45,7 +45,7 @@ void vulkan_release_functions(void) {
     loaded_library = NULL;
 }
 
-dynamic_array_t vulkan_get_required_extensions_for_presentation() {
+dynamic_array_t vulkan_get_required_extensions_for_presentation(void) {
     dynamic_array_t required_extensions = dynamic_array_allocate(sizeof(const char*));
 
     static const char* vk_surface_extension_name = VK_KHR_SURFACE_EXTENSION_NAME;
