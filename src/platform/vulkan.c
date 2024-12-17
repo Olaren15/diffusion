@@ -24,11 +24,18 @@ bool vulkan_load_global_functions(void) {
     }
 
     vkCreateInstance = (PFN_vkCreateInstance)vkGetInstanceProcAddr(NULL, "vkCreateInstance");
+    vkEnumerateInstanceLayerProperties = (PFN_vkEnumerateInstanceLayerProperties
+    )vkGetInstanceProcAddr(NULL, "vkEnumerateInstanceLayerProperties");
+
     return true;
 }
 
 void vulkan_load_instance_functions(VkInstance instance) {
     vkDestroyInstance = (PFN_vkDestroyInstance)vkGetInstanceProcAddr(instance, "vkDestroyInstance");
+    vkCreateDebugUtilsMessengerExt = (PFN_vkCreateDebugUtilsMessengerEXT)(void (*)(void)
+    )vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    vkDestroyDebugUtilsMessengerExt = (PFN_vkDestroyDebugUtilsMessengerEXT)(void (*)(void)
+    )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 }
 
 void vulkan_load_device_functions(VkDevice device) {
@@ -36,7 +43,10 @@ void vulkan_load_device_functions(VkDevice device) {
 
 void vulkan_release_functions(void) {
     vkCreateInstance = NULL;
+    vkEnumerateInstanceLayerProperties = NULL;
+
     vkDestroyInstance = NULL;
+    vkCreateDebugUtilsMessengerExt = NULL;
 
 #ifdef WIN32
     FreeLibrary(loaded_library);
@@ -63,6 +73,9 @@ dynamic_array_t vulkan_get_required_extensions_for_presentation(void) {
 // Global functions
 PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = NULL;
 PFN_vkCreateInstance vkCreateInstance = NULL;
+PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = NULL;
 
 // Instance functions
 PFN_vkDestroyInstance vkDestroyInstance = NULL;
+PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerExt = NULL;
+PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt = NULL;

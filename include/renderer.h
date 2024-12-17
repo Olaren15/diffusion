@@ -7,6 +7,8 @@
 
 typedef struct renderer_s {
     VkInstance vk_instance;
+    VkDebugUtilsMessengerEXT debug_messenger;
+    bool validation_layers_enabled;
 } renderer_t;
 
 /**

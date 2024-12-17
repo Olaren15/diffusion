@@ -40,8 +40,11 @@ dynamic_array_t vulkan_get_required_extensions_for_presentation(void);
 // Global functions
 extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
 extern PFN_vkCreateInstance vkCreateInstance;
+extern PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
 
 // Instance functions
 extern PFN_vkDestroyInstance vkDestroyInstance;
+extern PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerExt;
+extern PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt;
 
 #endif // DIFFUSION_PLATFORM_VULKAN_H
