@@ -2,9 +2,13 @@
 #define DIFFUSION_PLATFORM_WINDOW_H
 
 #include "event.h"
+#include "core/dynamic_array.h"
 
 #include <stdbool.h>
 #include <stdint.h>
+
+struct VkInstance_T;
+struct VkSurfaceKHR_T;
 
 typedef struct platform_window_s platform_window_t;
 
@@ -30,6 +34,18 @@ bool window_create(const char* title, int width, int height, window_t* window);
  * @param self The window to be destroyed
  */
 void window_destroy(window_t* self);
+
+/**
+ * Get platform-specific extensions required for vulkan presentation
+ *
+ * @returns A dynamic array of `const char*` containing the extension names
+ */
+dynamic_array_t window_get_required_extensions_for_presentation(void);
+
+/**
+ * Creates a VkSurfaceKHR for the specified window
+ */
+bool window_create_vk_surface(const window_t* self, struct VkInstance_T* instance, struct VkSurfaceKHR_T** surface);
 
 /**
  * Poll the window for new events

@@ -17,13 +17,20 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
-    renderer_init(&self->renderer);
+    if (!render_context_init(&self->render_context, &self->window)) {
+        return false;
+    }
+
+    if (!render_device_init(&self->render_device, &self->render_context)) {
+        return false;
+    }
 
     return true;
 }
 
 void engine_destroy(engine_t* self) {
-    renderer_destroy(&self->renderer);
+    render_device_destroy(&self->render_device);
+    render_context_destroy(&self->render_context);
     window_destroy(&self->window);
 }
 
@@ -43,6 +50,6 @@ void engine_run(const engine_t* self) {
 }
 
 static bool engine_iterate(const engine_t* self) {
-    renderer_render(&self->renderer);
+    (void)self; // Unused for now
     return true;
 }

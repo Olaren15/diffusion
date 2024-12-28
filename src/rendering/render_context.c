@@ -1,4 +1,4 @@
-﻿#include "rendering/renderer.h"
+﻿#include "rendering/render_context.h"
 
 #include "core/dynamic_array.h"
 #include "platform/vulkan.h"
@@ -16,44 +16,48 @@ const bool validation_layers_requested = true;
 const char* validation_layer_name = "VK_LAYER_KHRONOS_validation";
 const char* vk_ext_debug_utils_extension_name = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
-static bool render_should_enable_validation_layers(void);
-static bool is_layer_available(dynamic_array_t* available_layers, const char* layer_name);
+static bool should_enable_validation_layers(void);
+static bool is_layer_available(const dynamic_array_t* available_layers, const char* layer_name);
 static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_info(void);
-static bool renderer_create_vk_instance(renderer_t* self);
-static bool renderer_create_debug_messenger_callback(renderer_t* self);
-static VKAPI_ATTR VkBool32 VKAPI_CALL renderer_vulkan_debug_callback(
+static bool render_context_create_vk_instance(render_context_t* self, const window_t* window);
+static bool render_context_create_debug_messenger_callback(render_context_t* self);
+static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
   VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
   VkDebugUtilsMessageTypeFlagsEXT message_type,
   const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
   void* user_data
 );
 
-bool renderer_init(renderer_t* self) {
+bool render_context_init(render_context_t* self, const window_t* window) {
     if (!vulkan_load_global_functions()) {
         return false;
     }
 
-    self->validation_layers_enabled = render_should_enable_validation_layers();
+    self->validation_layers_enabled = should_enable_validation_layers();
 
-    if (!renderer_create_vk_instance(self)) {
+    if (!render_context_create_vk_instance(self, window)) {
         return false;
     }
 
     vulkan_load_instance_functions(self->vk_instance);
 
-    if (!renderer_create_debug_messenger_callback(self)) {
+    if (!render_context_create_debug_messenger_callback(self)) {
         return false;
     }
 
-    if (!device_init(&self->device, self->vk_instance)) {
-        return false;
+    if (window != NULL) {
+        if (!window_create_vk_surface(window, self->vk_instance, &self->vk_surface)) {
+            return false;
+        }
+    } else {
+        self->vk_surface = VK_NULL_HANDLE;
     }
 
     return true;
 }
 
-void renderer_destroy(renderer_t* self) {
-    device_destroy(&self->device);
+void render_context_destroy(render_context_t* self) {
+    vkDestroySurfaceKHR(self->vk_instance, self->vk_surface, NULL);
 
     if (vkDestroyDebugUtilsMessengerExt != NULL && self->debug_messenger != NULL) {
         vkDestroyDebugUtilsMessengerExt(self->vk_instance, self->debug_messenger, NULL);
@@ -63,15 +67,11 @@ void renderer_destroy(renderer_t* self) {
     vkDestroyInstance(self->vk_instance, NULL);
     self->vk_instance = VK_NULL_HANDLE;
 
-    vulkan_release_functions();
+    vulkan_release_instance_functions();
+    vulkan_release_global_functions();
 }
 
-void renderer_render(const renderer_t* self) {
-    // Unused for now
-    (void)self;
-}
-
-static bool render_should_enable_validation_layers(void) {
+static bool should_enable_validation_layers(void) {
     if (!validation_layers_requested) {
         return false;
     }
@@ -88,7 +88,7 @@ static bool render_should_enable_validation_layers(void) {
     return validation_layers_available;
 }
 
-static bool is_layer_available(dynamic_array_t* available_layers, const char* layer_name) {
+static bool is_layer_available(const dynamic_array_t* available_layers, const char* layer_name) {
     for (size_t i = 0; i < available_layers->element_count; i++) {
         VkLayerProperties layer_properties = ((VkLayerProperties*)available_layers->data)[i];
         if (strcmp(layer_name, layer_properties.layerName) == 0) {
@@ -108,13 +108,13 @@ static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_inf
       .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
                      | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
                      | VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT,
-      .pfnUserCallback = renderer_vulkan_debug_callback
+      .pfnUserCallback = vulkan_debug_callback
     };
 
     return create_infos;
 }
 
-static bool renderer_create_vk_instance(renderer_t* self) {
+static bool render_context_create_vk_instance(render_context_t* self, const window_t* window) {
     uint32_t engine_version = VK_MAKE_API_VERSION(
       PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH, 0
     );
@@ -127,7 +127,12 @@ static bool renderer_create_vk_instance(renderer_t* self) {
       .apiVersion = VK_API_VERSION_1_3,
     };
 
-    dynamic_array_t enabled_extensions = vulkan_get_required_extensions_for_presentation();
+    dynamic_array_t enabled_extensions = dynamic_array_allocate(sizeof(const char*));
+    if (window != NULL) {
+        dynamic_array_t presentation_extensions = window_get_required_extensions_for_presentation();
+        dynamic_array_concat(&enabled_extensions, &presentation_extensions);
+        dynamic_array_free(&presentation_extensions);
+    }
     dynamic_array_t enabled_layers = dynamic_array_allocate(sizeof(const char*));
 
     void* next = NULL;
@@ -160,7 +165,7 @@ static bool renderer_create_vk_instance(renderer_t* self) {
     return true;
 }
 
-static bool renderer_create_debug_messenger_callback(renderer_t* self) {
+static bool render_context_create_debug_messenger_callback(render_context_t* self) {
     if (!self->validation_layers_enabled) {
         self->debug_messenger = NULL;
         return true;
@@ -172,7 +177,7 @@ static bool renderer_create_debug_messenger_callback(renderer_t* self) {
     return result == VK_SUCCESS;
 }
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL renderer_vulkan_debug_callback(
+static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
   VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
   VkDebugUtilsMessageTypeFlagsEXT message_type,
   const VkDebugUtilsMessengerCallbackDataEXT* callback_data,

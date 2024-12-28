@@ -3,6 +3,7 @@
 #ifdef WIN32
 
 #include "event.h"
+#include "platform/vulkan.h"
 #include "platform/win32/win32_types.h"
 #include "platform/win32/win32_utils.h"
 #include "project.h"
@@ -10,6 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <vulkan/vulkan_win32.h>
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
@@ -135,6 +137,35 @@ bool window_poll_event(const window_t* self, event_t* event) {
 
     *event = latest_event;
     return message_received;
+}
+
+dynamic_array_t window_get_required_extensions_for_presentation(void) {
+    dynamic_array_t required_extensions = dynamic_array_allocate(sizeof(const char*));
+
+    static const char* vk_surface_extension_name = VK_KHR_SURFACE_EXTENSION_NAME;
+    dynamic_array_push(&required_extensions, &vk_surface_extension_name);
+
+    static const char* vk_platform_surface_extension_name = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
+    dynamic_array_push(&required_extensions, &vk_platform_surface_extension_name);
+
+    return required_extensions;
+}
+
+bool window_create_vk_surface(const window_t* self, VkInstance instance, VkSurfaceKHR* surface) {
+    VkWin32SurfaceCreateInfoKHR surface_create_info = {
+      .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+      .hinstance = self->platform_window->instance,
+      .hwnd = self->platform_window->window
+    };
+
+    PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR
+    )vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR");
+
+    if (vkCreateWin32SurfaceKHR(instance, &surface_create_info, NULL, surface) != VK_SUCCESS) {
+        return false;
+    }
+
+    return true;
 }
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {

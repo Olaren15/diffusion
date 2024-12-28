@@ -42,6 +42,9 @@ void vulkan_load_instance_functions(VkInstance instance) {
     )vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceProperties");
     vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties
     )vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceQueueFamilyProperties");
+    vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR
+    )vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+    vkDestroySurfaceKHR = (PFN_vkDestroySurfaceKHR)vkGetInstanceProcAddr(instance, "vkDestroySurfaceKHR");
     vkCreateDevice = (PFN_vkCreateDevice)vkGetInstanceProcAddr(instance, "vkCreateDevice");
     vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)vkGetInstanceProcAddr(instance, "vkGetDeviceProcAddr");
 }
@@ -51,20 +54,9 @@ void vulkan_load_device_functions(VkDevice device) {
     vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
 }
 
-void vulkan_release_functions(void) {
+void vulkan_release_global_functions(void) {
     vkCreateInstance = NULL;
     vkEnumerateInstanceLayerProperties = NULL;
-
-    vkDestroyInstance = NULL;
-    vkCreateDebugUtilsMessengerExt = NULL;
-    vkDestroyDebugUtilsMessengerExt = NULL;
-    vkEnumeratePhysicalDevices = NULL;
-    vkGetPhysicalDeviceProperties = NULL;
-    vkGetPhysicalDeviceQueueFamilyProperties = NULL;
-    vkCreateDevice = NULL;
-    vkGetDeviceProcAddr = NULL;
-
-    vkDestroyDevice = NULL;
 
 #ifdef WIN32
     FreeLibrary(loaded_library);
@@ -73,19 +65,21 @@ void vulkan_release_functions(void) {
     loaded_library = NULL;
 }
 
-dynamic_array_t vulkan_get_required_extensions_for_presentation(void) {
-    dynamic_array_t required_extensions = dynamic_array_allocate(sizeof(const char*));
+void vulkan_release_instance_functions(void) {
+    vkDestroyInstance = NULL;
+    vkCreateDebugUtilsMessengerExt = NULL;
+    vkDestroyDebugUtilsMessengerExt = NULL;
+    vkEnumeratePhysicalDevices = NULL;
+    vkGetPhysicalDeviceProperties = NULL;
+    vkGetPhysicalDeviceQueueFamilyProperties = NULL;
+    vkGetPhysicalDeviceSurfaceSupportKHR = NULL;
+    vkDestroySurfaceKHR = NULL;
+    vkCreateDevice = NULL;
+    vkGetDeviceProcAddr = NULL;
+}
 
-    static const char* vk_surface_extension_name = VK_KHR_SURFACE_EXTENSION_NAME;
-    dynamic_array_push(&required_extensions, &vk_surface_extension_name);
-
-#ifdef WIN32
-    static const char* vk_platform_surface_extension_name = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
-    dynamic_array_push(&required_extensions, &vk_platform_surface_extension_name);
-#else
-#endif
-
-    return required_extensions;
+void vulkan_release_device_function(void) {
+    vkDestroyDevice = NULL;
 }
 
 // Global functions
@@ -100,6 +94,8 @@ PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt = NULL;
 PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices = NULL;
 PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties = NULL;
 PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties = NULL;
+PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR = NULL;
+PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR = NULL;
 PFN_vkCreateDevice vkCreateDevice = NULL;
 PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = NULL;
 

@@ -26,16 +26,20 @@ void vulkan_load_instance_functions(VkInstance instance);
 void vulkan_load_device_functions(VkDevice device);
 
 /**
- * Release the loaded vulkan functions
+ * Release the loaded global vulkan functions
  */
-void vulkan_release_functions(void);
+void vulkan_release_global_functions(void);
 
 /**
- * Get platform-specific extensions required for vulkan presentation
- *
- * @returns A dynamic array of `const char*` containing the extension names
+ * Release the loaded instance-specific vulkan functions
  */
-dynamic_array_t vulkan_get_required_extensions_for_presentation(void);
+void vulkan_release_instance_functions(void);
+
+/**
+ * Release the loaded device-specific functions
+ */
+void vulkan_release_device_function(void);
+
 
 // Global functions
 extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
@@ -49,6 +53,8 @@ extern PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt;
 extern PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
 extern PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
 extern PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
+extern PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR;
+extern PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
 extern PFN_vkCreateDevice vkCreateDevice;
 extern PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr;
 

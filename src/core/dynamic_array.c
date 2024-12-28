@@ -56,6 +56,10 @@ void dynamic_array_push(dynamic_array_t* self, const void* element) {
     dynamic_array_push_multiple(self, element, 1);
 }
 
+void dynamic_array_concat(dynamic_array_t* self, const dynamic_array_t* other) {
+    dynamic_array_push_multiple(self, other->data, other->element_count);
+}
+
 void dynamic_array_push_multiple(dynamic_array_t* self, const void* elements, size_t element_count) {
     const size_t new_required_bytes = element_count * self->element_size;
     const size_t currently_used_bytes = self->element_count * self->element_size;

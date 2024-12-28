@@ -45,4 +45,6 @@ void dynamic_array_free(dynamic_array_t* self);
  */
 void dynamic_array_push(dynamic_array_t* self, const void* element);
 
+void dynamic_array_concat(dynamic_array_t* self, const dynamic_array_t* other);
+
 #endif // DIFFUSION_CORE_DYNAMIC_ARRAY_H

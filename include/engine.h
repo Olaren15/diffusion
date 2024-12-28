@@ -2,13 +2,15 @@
 #define DIFFUSION_ENGINE_H
 
 #include "platform/window.h"
-#include "rendering/renderer.h"
+#include "rendering/render_context.h"
+#include "rendering/render_device.h"
 
 #include <stdbool.h>
 
 typedef struct engine_s {
     window_t window;
-    renderer_t renderer;
+    render_context_t render_context;
+    render_device_t render_device;
 } engine_t;
 
 /**

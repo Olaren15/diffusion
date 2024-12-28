@@ -22,8 +22,8 @@ add_library(
         src/platform/win32/window.c
         src/platform/vulkan.c
         src/platform/win32/win32_utils.c
-        src/rendering/renderer.c
-        src/rendering/device.c
+        src/rendering/render_context.c
+        src/rendering/render_device.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
