@@ -2,7 +2,7 @@
 #define DIFFUSION_ENGINE_H
 
 #include "platform/window.h"
-#include "renderer.h"
+#include "rendering/renderer.h"
 
 #include <stdbool.h>
 

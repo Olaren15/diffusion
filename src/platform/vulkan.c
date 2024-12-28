@@ -32,13 +32,23 @@ bool vulkan_load_global_functions(void) {
 
 void vulkan_load_instance_functions(VkInstance instance) {
     vkDestroyInstance = (PFN_vkDestroyInstance)vkGetInstanceProcAddr(instance, "vkDestroyInstance");
-    vkCreateDebugUtilsMessengerExt = (PFN_vkCreateDebugUtilsMessengerEXT)(void (*)(void)
+    vkCreateDebugUtilsMessengerExt = (PFN_vkCreateDebugUtilsMessengerEXT
     )vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    vkDestroyDebugUtilsMessengerExt = (PFN_vkDestroyDebugUtilsMessengerEXT)(void (*)(void)
+    vkDestroyDebugUtilsMessengerExt = (PFN_vkDestroyDebugUtilsMessengerEXT
     )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    vkEnumeratePhysicalDevices = (PFN_vkEnumeratePhysicalDevices
+    )vkGetInstanceProcAddr(instance, "vkEnumeratePhysicalDevices");
+    vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties
+    )vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceProperties");
+    vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties
+    )vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceQueueFamilyProperties");
+    vkCreateDevice = (PFN_vkCreateDevice)vkGetInstanceProcAddr(instance, "vkCreateDevice");
+    vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)vkGetInstanceProcAddr(instance, "vkGetDeviceProcAddr");
 }
 
 void vulkan_load_device_functions(VkDevice device) {
+    vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(device, "vkDestroyDevice");
+    vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
 }
 
 void vulkan_release_functions(void) {
@@ -47,6 +57,14 @@ void vulkan_release_functions(void) {
 
     vkDestroyInstance = NULL;
     vkCreateDebugUtilsMessengerExt = NULL;
+    vkDestroyDebugUtilsMessengerExt = NULL;
+    vkEnumeratePhysicalDevices = NULL;
+    vkGetPhysicalDeviceProperties = NULL;
+    vkGetPhysicalDeviceQueueFamilyProperties = NULL;
+    vkCreateDevice = NULL;
+    vkGetDeviceProcAddr = NULL;
+
+    vkDestroyDevice = NULL;
 
 #ifdef WIN32
     FreeLibrary(loaded_library);
@@ -79,3 +97,12 @@ PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = NULL
 PFN_vkDestroyInstance vkDestroyInstance = NULL;
 PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerExt = NULL;
 PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt = NULL;
+PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices = NULL;
+PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties = NULL;
+PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties = NULL;
+PFN_vkCreateDevice vkCreateDevice = NULL;
+PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = NULL;
+
+// Device functions
+PFN_vkDestroyDevice vkDestroyDevice = NULL;
+PFN_vkGetDeviceQueue vkGetDeviceQueue = NULL;

@@ -17,12 +17,13 @@ add_library(
         ${PROJECT_NAME}
         STATIC
         ${CMAKE_BINARY_DIR}/generated/src/project.c
-        src/renderer.c
         src/engine.c
         src/core/dynamic_array.c
         src/platform/win32/window.c
         src/platform/vulkan.c
         src/platform/win32/win32_utils.c
+        src/rendering/renderer.c
+        src/rendering/device.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 

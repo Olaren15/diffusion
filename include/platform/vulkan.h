@@ -46,5 +46,14 @@ extern PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties
 extern PFN_vkDestroyInstance vkDestroyInstance;
 extern PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerExt;
 extern PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt;
+extern PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+extern PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+extern PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
+extern PFN_vkCreateDevice vkCreateDevice;
+extern PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr;
+
+// Device function
+extern PFN_vkDestroyDevice vkDestroyDevice;
+extern PFN_vkGetDeviceQueue vkGetDeviceQueue;
 
 #endif // DIFFUSION_PLATFORM_VULKAN_H

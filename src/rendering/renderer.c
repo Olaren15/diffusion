@@ -1,4 +1,4 @@
-﻿#include "renderer.h"
+﻿#include "rendering/renderer.h"
 
 #include "core/dynamic_array.h"
 #include "platform/vulkan.h"
@@ -16,9 +16,9 @@ const bool validation_layers_requested = true;
 const char* validation_layer_name = "VK_LAYER_KHRONOS_validation";
 const char* vk_ext_debug_utils_extension_name = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
-static bool render_should_enable_validation_layers();
+static bool render_should_enable_validation_layers(void);
 static bool is_layer_available(dynamic_array_t* available_layers, const char* layer_name);
-static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_info();
+static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_info(void);
 static bool renderer_create_vk_instance(renderer_t* self);
 static bool renderer_create_debug_messenger_callback(renderer_t* self);
 static VKAPI_ATTR VkBool32 VKAPI_CALL renderer_vulkan_debug_callback(
@@ -45,23 +45,33 @@ bool renderer_init(renderer_t* self) {
         return false;
     }
 
+    if (!device_init(&self->device, self->vk_instance)) {
+        return false;
+    }
+
     return true;
 }
 
 void renderer_destroy(renderer_t* self) {
+    device_destroy(&self->device);
+
     if (vkDestroyDebugUtilsMessengerExt != NULL && self->debug_messenger != NULL) {
         vkDestroyDebugUtilsMessengerExt(self->vk_instance, self->debug_messenger, NULL);
+        self->debug_messenger = VK_NULL_HANDLE;
     }
 
     vkDestroyInstance(self->vk_instance, NULL);
+    self->vk_instance = VK_NULL_HANDLE;
+
     vulkan_release_functions();
 }
 
 void renderer_render(const renderer_t* self) {
-    // Do something
+    // Unused for now
+    (void)self;
 }
 
-static bool render_should_enable_validation_layers() {
+static bool render_should_enable_validation_layers(void) {
     if (!validation_layers_requested) {
         return false;
     }
@@ -79,7 +89,7 @@ static bool render_should_enable_validation_layers() {
 }
 
 static bool is_layer_available(dynamic_array_t* available_layers, const char* layer_name) {
-    for (int i = 0; i < available_layers->element_count; i++) {
+    for (size_t i = 0; i < available_layers->element_count; i++) {
         VkLayerProperties layer_properties = ((VkLayerProperties*)available_layers->data)[i];
         if (strcmp(layer_name, layer_properties.layerName) == 0) {
             return true;
@@ -89,7 +99,7 @@ static bool is_layer_available(dynamic_array_t* available_layers, const char* la
     return false;
 }
 
-static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_info() {
+static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_info(void) {
     VkDebugUtilsMessengerCreateInfoEXT create_infos = {
       .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
       .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
@@ -114,7 +124,7 @@ static bool renderer_create_vk_instance(renderer_t* self) {
       .applicationVersion = engine_version,
       .pEngineName = PROJECT_NAME,
       .engineVersion = engine_version,
-      .apiVersion = VK_API_VERSION_1_0,
+      .apiVersion = VK_API_VERSION_1_3,
     };
 
     dynamic_array_t enabled_extensions = vulkan_get_required_extensions_for_presentation();
@@ -168,6 +178,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL renderer_vulkan_debug_callback(
   const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
   void* user_data
 ) {
+    // Unused variables
+    (void)message_type;
+    (void)user_data;
+
     const char* severity_level_text;
     switch (message_severity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -182,8 +196,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL renderer_vulkan_debug_callback(
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
             severity_level_text = "ERROR";
             break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
-            severity_level_text = "MAX";
+        default:
+            severity_level_text = "UNKNOWN";
             break;
     }
 
