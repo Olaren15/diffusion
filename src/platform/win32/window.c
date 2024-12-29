@@ -30,7 +30,7 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
 
 static event_t latest_event;
 
-bool window_create(const char* title, int width, int height, window_t* window) {
+bool window_create(const char* title, uint32_t width, uint32_t height, window_t* window) {
     wchar_t* window_title_w = win32_create_wide_string_from_uti8_string(title);
     wchar_t* window_class_name_w = win32_create_wide_string_from_uti8_string(PROJECT_NAME);
 
@@ -69,8 +69,8 @@ bool window_create(const char* title, int width, int height, window_t* window) {
 
     int primary_screen_width = GetSystemMetrics(SM_CXSCREEN);
     int primary_screen_height = GetSystemMetrics(SM_CYSCREEN);
-    int position_x = (primary_screen_width / 2) - (width / 2);
-    int position_y = (primary_screen_height / 2) - (height / 2);
+    int position_x = (primary_screen_width / 2) - ((int)width / 2);
+    int position_y = (primary_screen_height / 2) - ((int)height / 2);
 
     HWND window_handle = CreateWindowExW(
       0,
@@ -79,8 +79,8 @@ bool window_create(const char* title, int width, int height, window_t* window) {
       WS_OVERLAPPEDWINDOW | WS_VISIBLE,
       position_x,
       position_y,
-      width,
-      height,
+      (int)width,
+      (int)height,
       NULL,
       NULL,
       instance,
@@ -128,17 +128,6 @@ void window_destroy(window_t* self) {
     free(self->platform_window);
 }
 
-bool window_poll_event(const window_t* self, event_t* event) {
-    MSG message;
-    BOOL message_received = PeekMessageW(&message, self->platform_window->window, 0, 0, PM_REMOVE);
-
-    TranslateMessage(&message);
-    DispatchMessageW(&message);
-
-    *event = latest_event;
-    return message_received;
-}
-
 dynamic_array_t window_get_required_extensions_for_presentation(void) {
     dynamic_array_t required_extensions = dynamic_array_allocate(sizeof(const char*));
 
@@ -166,6 +155,29 @@ bool window_create_vk_surface(const window_t* self, VkInstance instance, VkSurfa
     }
 
     return true;
+}
+
+bool window_get_dimensions_pixels(const window_t* self, uint32_t* width, uint32_t* height) {
+    RECT dimensions;
+    if (!GetClientRect(self->platform_window->window, &dimensions)) {
+        return false;
+    }
+
+    *width = (uint32_t)dimensions.right;
+    *height = (uint32_t)dimensions.bottom;
+
+    return true;
+}
+
+bool window_poll_event(const window_t* self, event_t* event) {
+    MSG message;
+    BOOL message_received = PeekMessageW(&message, self->platform_window->window, 0, 0, PM_REMOVE);
+
+    TranslateMessage(&message);
+    DispatchMessageW(&message);
+
+    *event = latest_event;
+    return message_received;
 }
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {

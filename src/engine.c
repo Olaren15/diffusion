@@ -2,8 +2,8 @@
 
 #include "project.h"
 
-const int DEFAULT_WIDTH = 1920;
-const int DEFAULT_HEIGHT = 1080;
+const uint32_t DEFAULT_WIDTH = 1920;
+const uint32_t DEFAULT_HEIGHT = 1080;
 
 /*
  * Do one iteration (frame) worth of stuff
@@ -25,10 +25,21 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
+    if (!swapchain_init(
+          &self->swapchain,
+          self->render_context.vk_surface,
+          &self->render_device,
+          &self->render_device.present_capabilities,
+          &self->window
+        )) {
+        return false;
+    }
+
     return true;
 }
 
 void engine_destroy(engine_t* self) {
+    swapchain_destroy(&self->swapchain, &self->render_device);
     render_device_destroy(&self->render_device);
     render_context_destroy(&self->render_context);
     window_destroy(&self->window);

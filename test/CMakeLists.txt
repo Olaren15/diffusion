@@ -7,3 +7,4 @@
 endfunction()
 
 add_test_case(core.dynamic_array_tests src/core/dynamic_array_tests.c)
+add_test_case(core.math_tests src/core/math_tests.c)

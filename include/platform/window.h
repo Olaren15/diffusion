@@ -26,7 +26,7 @@ typedef struct window_s {
  *
  * @returns true on success or false on failure
  */
-bool window_create(const char* title, int width, int height, window_t* window);
+bool window_create(const char* title, uint32_t width, uint32_t height, window_t* window);
 
 /**
  * Destroy a platform-specific window
@@ -44,8 +44,17 @@ dynamic_array_t window_get_required_extensions_for_presentation(void);
 
 /**
  * Creates a VkSurfaceKHR for the specified window
+ *
+ * @returns true on success or false on failure
  */
 bool window_create_vk_surface(const window_t* self, struct VkInstance_T* instance, struct VkSurfaceKHR_T** surface);
+
+/**
+ * Get the width and height (in pixels) of the window
+ *
+ * @returns true on success or false on failure
+ */
+bool window_get_dimensions_pixels(const window_t* self, uint32_t* width, uint32_t* height);
 
 /**
  * Poll the window for new events

@@ -38,8 +38,7 @@ void vulkan_release_instance_functions(void);
 /**
  * Release the loaded device-specific functions
  */
-void vulkan_release_device_function(void);
-
+void vulkan_release_device_functions(void);
 
 // Global functions
 extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
@@ -52,8 +51,12 @@ extern PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerExt;
 extern PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerExt;
 extern PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
 extern PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+extern PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties;
 extern PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
 extern PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR;
+extern PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
+extern PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR;
+extern PFN_vkGetPhysicalDeviceSurfacePresentModesKHR vkGetPhysicalDeviceSurfacePresentModesKHR;
 extern PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
 extern PFN_vkCreateDevice vkCreateDevice;
 extern PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr;
@@ -61,5 +64,10 @@ extern PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr;
 // Device function
 extern PFN_vkDestroyDevice vkDestroyDevice;
 extern PFN_vkGetDeviceQueue vkGetDeviceQueue;
+extern PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
+extern PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
+extern PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
+extern PFN_vkCreateImageView vkCreateImageView;
+extern PFN_vkDestroyImageView vkDestroyImageView;
 
 #endif // DIFFUSION_PLATFORM_VULKAN_H

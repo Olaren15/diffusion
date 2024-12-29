@@ -4,6 +4,7 @@
 #include "platform/window.h"
 #include "rendering/render_context.h"
 #include "rendering/render_device.h"
+#include "rendering/swapchain.h"
 
 #include <stdbool.h>
 
@@ -11,6 +12,7 @@ typedef struct engine_s {
     window_t window;
     render_context_t render_context;
     render_device_t render_device;
+    swapchain_t swapchain;
 } engine_t;
 
 /**

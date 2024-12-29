@@ -24,6 +24,8 @@ add_library(
         src/platform/win32/win32_utils.c
         src/rendering/render_context.c
         src/rendering/render_device.c
+        src/rendering/swapchain.c
+        src/core/math.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
