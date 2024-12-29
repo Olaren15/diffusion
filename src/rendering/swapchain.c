@@ -123,7 +123,7 @@ bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFo
     }
 
     static VkSurfaceFormatKHR desired_formats[] = {
-      {.format = VK_FORMAT_A2R10G10B10_SNORM_PACK32, .colorSpace = VK_COLOR_SPACE_HDR10_ST2084_EXT  },
+      {.format = VK_FORMAT_A2B10G10R10_UNORM_PACK32, .colorSpace = VK_COLOR_SPACE_HDR10_ST2084_EXT  },
       {.format = VK_FORMAT_B8G8R8A8_SRGB,            .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}
     };
 
