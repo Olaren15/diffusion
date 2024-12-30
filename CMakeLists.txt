@@ -26,10 +26,12 @@ add_library(
         src/platform/vulkan.c
         src/platform/win32/win32_utils.c
 
-        src/rendering/frame_data.c
+        src/rendering/frame.c
+        src/rendering/frame_sync.c
         src/rendering/render_context.c
         src/rendering/render_device.c
         src/rendering/swapchain.c
+        src/rendering/vk_utils.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 

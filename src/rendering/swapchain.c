@@ -1,6 +1,7 @@
 ﻿#include "rendering/swapchain.h"
 
 #include "core/math.h"
+#include "rendering/vk_utils.h"
 
 bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFormatKHR* chosen_format);
 bool choose_presentation_mode(const dynamic_array_t* available_modes, VkPresentModeKHR* chosen_mode);
@@ -49,21 +50,13 @@ bool swapchain_init(
       .imageExtent = self->extent,
       .imageArrayLayers = 1,
       .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+      .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       .preTransform = present_capabilities->vk_surface_capabilities.currentTransform,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
       .presentMode = self->present_mode,
       .clipped = VK_TRUE,
       .oldSwapchain = VK_NULL_HANDLE,
     };
-
-    uint32_t queue_family_indices[] = {device->present_queue_family_index, device->graphics_queue_family_index};
-    if (device->present_queue_family_index == device->graphics_queue_family_index) {
-        swapchain_create_infos.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    } else {
-        swapchain_create_infos.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        swapchain_create_infos.queueFamilyIndexCount = 2;
-        swapchain_create_infos.pQueueFamilyIndices = queue_family_indices;
-    }
 
     if (vkCreateSwapchainKHR(device->vk_device, &swapchain_create_infos, NULL, &self->vk_swapchain) != VK_SUCCESS) {
         return false;
@@ -88,13 +81,7 @@ bool swapchain_init(
                          .g = VK_COMPONENT_SWIZZLE_IDENTITY,
                          .b = VK_COMPONENT_SWIZZLE_IDENTITY,
                          .a = VK_COMPONENT_SWIZZLE_IDENTITY},
-          .subresourceRange = {
-                         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                         .baseMipLevel = 0,
-                         .levelCount = 1,
-                         .baseArrayLayer = 0,
-                         .layerCount = 1
-          }
+          .subresourceRange = subresource_range_color_all_mips,
         };
 
         if (vkCreateImageView(device->vk_device, &image_view_create_info, NULL, image_view) != VK_SUCCESS) {
@@ -171,5 +158,84 @@ bool choose_presentation_mode(const dynamic_array_t* available_modes, VkPresentM
     }
 
     *chosen_mode = ((VkPresentModeKHR*)available_modes->data)[0];
+    return true;
+}
+
+bool swapchain_acquire_next_image(
+  swapchain_t* self, const render_device_t* device, uint32_t wait_time, const frame_t* frame
+) {
+    if (vkAcquireNextImageKHR(
+          device->vk_device,
+          self->vk_swapchain,
+          wait_time,
+          frame->sync.swapchain_image_available_semaphore,
+          VK_NULL_HANDLE,
+          &self->current_image_index
+        )
+        != VK_SUCCESS) {
+        return false;
+    }
+
+    self->current_image = ((VkImage*)self->images.data)[self->current_image_index];
+
+    return true;
+}
+
+void swapchain_prepare_current_image_for_writing(const swapchain_t* self, VkCommandBuffer command_buffer) {
+    VkImageMemoryBarrier2 write_to_swapchain_image_barrier = {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+      .srcStageMask = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
+      .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+      .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+      .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+      .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      .image = self->current_image,
+      .subresourceRange = subresource_range_color_all_mips,
+    };
+
+    VkDependencyInfo write_to_swapchain_image_dependency_info = {
+      .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+      .imageMemoryBarrierCount = 1,
+      .pImageMemoryBarriers = &write_to_swapchain_image_barrier
+    };
+
+    vkCmdPipelineBarrier2(command_buffer, &write_to_swapchain_image_dependency_info);
+}
+
+void swapchain_prepare_current_image_for_presentation(const swapchain_t* self, VkCommandBuffer command_buffer) {
+    VkImageMemoryBarrier2 present_swapchain_image_barrier = {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+      .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+      .dstStageMask = VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
+      .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+      .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+      .image = self->current_image,
+      .subresourceRange = subresource_range_color_all_mips,
+    };
+
+    VkDependencyInfo present_swapchain_image_dependency_info = {
+      .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+      .imageMemoryBarrierCount = 1,
+      .pImageMemoryBarriers = &present_swapchain_image_barrier
+    };
+
+    vkCmdPipelineBarrier2(command_buffer, &present_swapchain_image_dependency_info);
+}
+
+bool swapchain_present(const swapchain_t* self, const render_device_t* device, const frame_t* frame) {
+    VkPresentInfoKHR present_info = {
+      .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+      .swapchainCount = 1,
+      .pSwapchains = &self->vk_swapchain,
+      .waitSemaphoreCount = 1,
+      .pWaitSemaphores = &frame->sync.render_completed_semaphore,
+      .pImageIndices = &self->current_image_index,
+    };
+
+    if (vkQueuePresentKHR(device->graphics_queue, &present_info) != VK_SUCCESS) {
+        return false;
+    }
+
     return true;
 }

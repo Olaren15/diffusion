@@ -14,8 +14,6 @@ typedef struct render_device {
     VkDevice vk_device;
     VkQueue graphics_queue;
     uint32_t graphics_queue_family_index;
-    VkQueue present_queue;
-    uint32_t present_queue_family_index;
     present_capabilities_t present_capabilities;
 } render_device_t;
 

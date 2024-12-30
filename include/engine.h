@@ -2,7 +2,7 @@
 #define DIFFUSION_ENGINE_H
 
 #include "platform/window.h"
-#include "rendering/frame_data.h"
+#include "rendering/frame.h"
 #include "rendering/render_context.h"
 #include "rendering/render_device.h"
 #include "rendering/swapchain.h"
@@ -17,7 +17,7 @@ typedef struct engine_s {
     render_device_t render_device;
     swapchain_t swapchain;
     uint32_t current_frame;
-    frame_data_t frames_data[ENGINE_MAX_FRAMES_IN_FLIGHT];
+    frame_t frames[ENGINE_MAX_FRAMES_IN_FLIGHT];
 } engine_t;
 
 /**
