@@ -48,7 +48,7 @@ bool swapchain_init(
       .imageColorSpace = self->surface_format.colorSpace,
       .imageExtent = self->extent,
       .imageArrayLayers = 1,
-      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
       .preTransform = present_capabilities->vk_surface_capabilities.currentTransform,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
       .presentMode = self->present_mode,
@@ -106,6 +106,8 @@ bool swapchain_init(
 }
 
 void swapchain_destroy(swapchain_t* self, const render_device_t* device) {
+    vkDeviceWaitIdle(device->vk_device);
+
     for (size_t i = 0; i < self->image_views.element_count; i++) {
         VkImageView image_view = ((VkImageView*)self->image_views.data)[i];
         vkDestroyImageView(device->vk_device, image_view, NULL);
@@ -123,7 +125,7 @@ bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFo
     }
 
     static VkSurfaceFormatKHR desired_formats[] = {
-      {.format = VK_FORMAT_A2R10G10B10_SNORM_PACK32, .colorSpace = VK_COLOR_SPACE_HDR10_ST2084_EXT  },
+      {.format = VK_FORMAT_A2B10G10R10_UNORM_PACK32, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR},
       {.format = VK_FORMAT_B8G8R8A8_SRGB,            .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}
     };
 

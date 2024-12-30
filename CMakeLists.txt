@@ -18,14 +18,18 @@ add_library(
         STATIC
         ${CMAKE_BINARY_DIR}/generated/src/project.c
         src/engine.c
+
         src/core/dynamic_array.c
+        src/core/math.c
+
         src/platform/win32/window.c
         src/platform/vulkan.c
         src/platform/win32/win32_utils.c
+
+        src/rendering/frame_data.c
         src/rendering/render_context.c
         src/rendering/render_device.c
         src/rendering/swapchain.c
-        src/core/math.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 

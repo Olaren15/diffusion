@@ -107,6 +107,8 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
 }
 
 void render_device_destroy(render_device_t* self) {
+    vkDeviceWaitIdle(self->vk_device);
+
     vkDestroyDevice(self->vk_device, NULL);
     vulkan_release_device_functions();
 

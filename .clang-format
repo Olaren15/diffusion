@@ -56,9 +56,6 @@ IndentWidth: 4
 IndentWrappedFunctionNames: true
 InsertBraces: true
 InsertNewlineAtEOF: true
-IntegerLiteralSeparator:
-  Decimal: 3
-  DecimalMinDigits: 5
 LambdaBodyIndentation: Signature
 LineEnding: DeriveLF
 MaxEmptyLinesToKeep: 1
@@ -96,5 +93,4 @@ SpacesInLineCommentPrefix:
   Maximum: 1
 SpacesInParens: Never
 SpacesInSquareBrackets: false
-Standard: c++20
 UseTab: Never

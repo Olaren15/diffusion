@@ -63,11 +63,29 @@ extern PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr;
 
 // Device function
 extern PFN_vkDestroyDevice vkDestroyDevice;
+extern PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
 extern PFN_vkGetDeviceQueue vkGetDeviceQueue;
 extern PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
 extern PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
+extern PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
 extern PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 extern PFN_vkCreateImageView vkCreateImageView;
 extern PFN_vkDestroyImageView vkDestroyImageView;
+extern PFN_vkCreateCommandPool vkCreateCommandPool;
+extern PFN_vkResetCommandPool vkResetCommandPool;
+extern PFN_vkDestroyCommandPool vkDestroyCommandPool;
+extern PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+extern PFN_vkCreateFence vkCreateFence;
+extern PFN_vkWaitForFences vkWaitForFences;
+extern PFN_vkResetFences vkResetFences;
+extern PFN_vkDestroyFence vkDestroyFence;
+extern PFN_vkCreateSemaphore vkCreateSemaphore;
+extern PFN_vkDestroySemaphore vkDestroySemaphore;
+extern PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+extern PFN_vkCmdPipelineBarrier2 vkCmdPipelineBarrier2;
+extern PFN_vkCmdClearColorImage vkCmdClearColorImage;
+extern PFN_vkEndCommandBuffer vkEndCommandBuffer;
+extern PFN_vkQueueSubmit2 vkQueueSubmit2;
+extern PFN_vkQueuePresentKHR vkQueuePresentKHR;
 
 #endif // DIFFUSION_PLATFORM_VULKAN_H
