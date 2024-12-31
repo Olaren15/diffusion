@@ -5,6 +5,6 @@
 
 extern const VkImageSubresourceRange subresource_range_color_all_mips;
 
-extern const VkClearColorValue clear_color_white_unorm;
+extern const VkClearColorValue clear_color_black_unorm;
 
 #endif // DIFFUSION_RENDERING_VK_UTILS_H

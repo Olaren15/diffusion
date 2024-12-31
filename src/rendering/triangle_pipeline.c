@@ -7,27 +7,23 @@ bool create_shader_module(
 
 bool triangle_pipeline_create(
   triangle_pipeline_t* self, const render_device_t* device, VkFormat color_attachment_format) {
-    VkShaderModule vertex_shader;
-    if (!create_shader_module("shaders/triangle.vert.spv", device, &vertex_shader)) {
-        return false;
-    }
-
-    VkShaderModule fragment_shader;
-    if (!create_shader_module("shaders/triangle.frag.spv", device, &fragment_shader)) {
+    VkShaderModule triangle_shader;
+    if (!create_shader_module("shaders/triangle.spv", device, &triangle_shader)) {
         return false;
     }
 
     VkPipelineShaderStageCreateInfo vertex_shader_stage_info = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
       .stage = VK_SHADER_STAGE_VERTEX_BIT,
-      .module = vertex_shader,
-      .pName = "main"};
+      .module = triangle_shader,
+      .pName = "vertex_main",
+    };
 
     VkPipelineShaderStageCreateInfo fragment_shader_stage_info = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
       .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-      .module = fragment_shader,
-      .pName = "main",
+      .module = triangle_shader,
+      .pName = "fragment_main",
     };
 
     VkDynamicState dynamic_states[2] = {
@@ -139,8 +135,7 @@ bool triangle_pipeline_create(
         return false;
     }
 
-    vkDestroyShaderModule(device->vk_device, vertex_shader, NULL);
-    vkDestroyShaderModule(device->vk_device, fragment_shader, NULL);
+    vkDestroyShaderModule(device->vk_device, triangle_shader, NULL);
 
     return true;
 }

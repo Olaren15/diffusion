@@ -106,7 +106,7 @@ static bool engine_iterate(engine_t* self) {
       .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
       .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
       .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-      .clearValue = {clear_color_white_unorm},
+      .clearValue = {clear_color_black_unorm},
     };
 
     VkRect2D whole_frame_rect = {

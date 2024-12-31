@@ -1,37 +1,32 @@
 ﻿set(
         SHADER_SOURCES
-        triangle.vert
-        triangle.frag
+        triangle.slang
 )
 
 set(SHADER_COMMANDS)
 set(SHADER_PRODUCTS)
+
+cmake_path(APPEND VULKAN_SDK_BIN_DIR $ENV{VULKAN_SDK} "bin")
+find_program(SLANGC_EXECUTABLE slangc PATHS VULKAN_SDK_BIN_DIR REQUIRED)
 
 foreach (SHADER_SOURCE IN LISTS SHADER_SOURCES)
     cmake_path(ABSOLUTE_PATH SHADER_SOURCE NORMALIZE)
     cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
 
     cmake_path(APPEND SHADER_OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR} ${SHADER_NAME})
-    set(SHADER_OUTPUT_FILE "${SHADER_OUTPUT_FILE}.spv")
+    cmake_path(REPLACE_EXTENSION SHADER_OUTPUT_FILE "spv")
 
-    # Build command
-    list(APPEND SHADER_COMMAND COMMAND)
-    list(APPEND SHADER_COMMAND Vulkan::glslc)
-    list(APPEND SHADER_COMMAND "${SHADER_SOURCE}")
-    list(APPEND SHADER_COMMAND "-o")
-    list(APPEND SHADER_COMMAND ${SHADER_OUTPUT_FILE})
+    add_custom_command(
+            OUTPUT ${SHADER_OUTPUT_FILE}
+            DEPENDS ${SHADER_SOURCE}
+            COMMAND ${SLANGC_EXECUTABLE} ${SHADER_SOURCE} -target spirv -fvk-use-entrypoint-name -o ${SHADER_OUTPUT_FILE}
+            COMMENT "Compiling shader ${SHADER_SOURCE}"
+    )
 
-    list(APPEND SHADER_COMMANDS ${SHADER_COMMAND})
-
-    # Add product
     list(APPEND SHADER_PRODUCTS ${SHADER_OUTPUT_FILE})
-
 endforeach ()
 
 add_custom_target(
         ${PROJECT_NAME}-shaders
-        COMMAND ${SHADER_COMMANDS}
-        COMMENT "Compiling shaders"
-        BYPRODUCTS ${SHADER_PRODUCTS}
-        SOURCES ${SHADER_SOURCE_FILES}
+        DEPENDS ${SHADER_PRODUCTS}
 )

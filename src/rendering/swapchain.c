@@ -138,10 +138,11 @@ bool choose_surface_format(
     static VkSurfaceFormatKHR desired_formats[] = {
       {.format = VK_FORMAT_A2B10G10R10_UNORM_PACK32,
        .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR                                              },
+      {.format = VK_FORMAT_B8G8R8A8_UNORM,           .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR},
       {.format = VK_FORMAT_B8G8R8A8_SRGB,            .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}
     };
 
-    for (size_t i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 3; i++) {
         VkSurfaceFormatKHR desired_format = desired_formats[i];
 
         for (size_t j = 0; j < available_formats->element_count; j++) {
