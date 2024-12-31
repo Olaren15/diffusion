@@ -1,8 +1,8 @@
 ﻿#ifndef DIFFUSION_PLATFORM_WINDOW_H
 #define DIFFUSION_PLATFORM_WINDOW_H
 
-#include "event.h"
 #include "core/dynamic_array.h"
+#include "event.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,7 +47,8 @@ dynamic_array_t window_get_required_extensions_for_presentation(void);
  *
  * @returns true on success or false on failure
  */
-bool window_create_vk_surface(const window_t* self, struct VkInstance_T* instance, struct VkSurfaceKHR_T** surface);
+bool window_create_vk_surface(
+  const window_t* self, struct VkInstance_T* instance, struct VkSurfaceKHR_T** surface);
 
 /**
  * Get the width and height (in pixels) of the window

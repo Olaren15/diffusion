@@ -19,7 +19,6 @@ typedef struct dynamic_array_s {
  */
 dynamic_array_t dynamic_array_allocate(size_t element_size);
 
-
 /**
  * Allocates a dynamic size array with a specific size
  *

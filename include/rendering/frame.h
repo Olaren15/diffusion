@@ -26,7 +26,8 @@ void frame_destroy(frame_t* self, const render_device_t* device);
 /**
  * Wait until the frame is done rendering
  */
-bool frame_wait_for_render_completed(frame_t* self, const render_device_t* device, uint32_t timeout);
+bool frame_wait_for_render_completed(
+  frame_t* self, const render_device_t* device, uint32_t timeout);
 
 /**
  * Begin recording a new frame

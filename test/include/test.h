@@ -25,32 +25,34 @@ extern int tests_failed;
             return message;        \
     } while (0)
 
-#define ASSERT_TRUE(actual)                                                                                    \
-    TEST_ASSERT(                                                                                               \
-      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to be true", (actual) == 1 \
-    )
+#define ASSERT_TRUE(actual)                                                                      \
+    TEST_ASSERT(                                                                                 \
+      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to be true", \
+      (actual) == 1)
 
-#define ASSERT_EQUALS(expected, actual)                                                                          \
-    TEST_ASSERT(                                                                                                 \
-      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to equal \"" #expected "\"", \
-      expected == actual                                                                                         \
-    )
+#define ASSERT_EQUALS(expected, actual)                                         \
+    TEST_ASSERT(                                                                \
+      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual \
+      "\" to equal \"" #expected "\"",                                          \
+      expected == actual)
 
-#define ASSERT_STRING_EQUALS(expected, actual)                                                                   \
-    TEST_ASSERT(                                                                                                 \
-      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to equal \"" #expected "\"", \
-      strcmp(expected, actual) == 0                                                                              \
-    )
+#define ASSERT_STRING_EQUALS(expected, actual)                                  \
+    TEST_ASSERT(                                                                \
+      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual \
+      "\" to equal \"" #expected "\"",                                          \
+      strcmp(expected, actual) == 0)
 
-#define ASSERT_NULL(actual)                                                                                     \
-    TEST_ASSERT(                                                                                                \
-      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to be NULL", actual == NULL \
-    )
+#define ASSERT_NULL(actual)                                                                      \
+    TEST_ASSERT(                                                                                 \
+      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to be NULL", \
+      actual == NULL)
 
-#define ASSERT_NOT_NULL(actual)                                                                                     \
-    TEST_ASSERT(                                                                                                    \
-      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual "\" to not be NULL", actual != NULL \
-    )
+#define ASSERT_NOT_NULL(actual)                                                 \
+    TEST_ASSERT(                                                                \
+      "Error in file " __FILE__ " at line " LINE_STRING ": expected \"" #actual \
+      "\" to not be "                                                           \
+      "NULL",                                                                   \
+      actual != NULL)
 
 #define TEST_SUCCESS return NULL
 
@@ -70,19 +72,23 @@ extern int tests_failed;
 
 #define TEST_RUN_ALL static void all_tests(void)
 
-#define TEST_MAIN_IMPL                                                                                          \
-    int main(int argc, char** argv) {                                                                           \
-        all_tests();                                                                                            \
-                                                                                                                \
-        if (tests_failed != 0) {                                                                                \
-            printf("%d test(s) failed. See above for details.\n", tests_failed);                                \
-        } else {                                                                                                \
-            printf("ALL TESTS PASSED\n");                                                                       \
-        }                                                                                                       \
-                                                                                                                \
-        printf("Test(s) ran: %d succeeded, %d failure. Total: %d\n", tests_succeeded, tests_failed, tests_ran); \
-                                                                                                                \
-        return tests_failed != 0;                                                                               \
+#define TEST_MAIN_IMPL                                                           \
+    int main(int argc, char** argv) {                                            \
+        all_tests();                                                             \
+                                                                                 \
+        if (tests_failed != 0) {                                                 \
+            printf("%d test(s) failed. See above for details.\n", tests_failed); \
+        } else {                                                                 \
+            printf("ALL TESTS PASSED\n");                                        \
+        }                                                                        \
+                                                                                 \
+        printf(                                                                  \
+          "Test(s) ran: %d succeeded, %d failure. Total: %d\n",                  \
+          tests_succeeded,                                                       \
+          tests_failed,                                                          \
+          tests_ran);                                                            \
+                                                                                 \
+        return tests_failed != 0;                                                \
     }
 
 #endif // DIFFUSION_TEST_H

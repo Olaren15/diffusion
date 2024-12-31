@@ -32,8 +32,7 @@ bool engine_init(engine_t* self) {
           self->render_context.vk_surface,
           &self->render_device,
           &self->render_device.present_capabilities,
-          &self->window
-        )) {
+          &self->window)) {
         return false;
     }
 
@@ -75,11 +74,13 @@ static bool engine_iterate(engine_t* self) {
     self->current_frame = (self->current_frame + 1) % ENGINE_MAX_FRAMES_IN_FLIGHT;
     frame_t* current_frame = self->frames + self->current_frame;
 
-    if (!frame_wait_for_render_completed(current_frame, &self->render_device, MAX_FRAME_WAIT_TIME)) {
+    if (!frame_wait_for_render_completed(
+          current_frame, &self->render_device, MAX_FRAME_WAIT_TIME)) {
         return false;
     }
 
-    if (!swapchain_acquire_next_image(&self->swapchain, &self->render_device, MAX_FRAME_WAIT_TIME, current_frame)) {
+    if (!swapchain_acquire_next_image(
+          &self->swapchain, &self->render_device, MAX_FRAME_WAIT_TIME, current_frame)) {
         return false;
     }
 
@@ -95,10 +96,10 @@ static bool engine_iterate(engine_t* self) {
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       &clear_color_white_unorm,
       1,
-      &subresource_range_color_all_mips
-    );
+      &subresource_range_color_all_mips);
 
-    swapchain_prepare_current_image_for_presentation(&self->swapchain, current_frame->command_buffer);
+    swapchain_prepare_current_image_for_presentation(
+      &self->swapchain, current_frame->command_buffer);
 
     if (!frame_end(current_frame, &self->render_device)) {
         return false;

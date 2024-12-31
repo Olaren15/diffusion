@@ -84,21 +84,23 @@ bool window_create(const char* title, uint32_t width, uint32_t height, window_t*
       NULL,
       NULL,
       instance,
-      NULL
-    );
+      NULL);
     if (window_handle == NULL) {
         return false;
     }
 
     HINSTANCE dwmapi_lib = LoadLibraryW(L"dwmapi.dll");
     if (dwmapi_lib != NULL) {
-        DwmSetWindowAttribute_fn DwmSetWindowAttribute_function = (DwmSetWindowAttribute_fn)(void (*)(void)
-        )GetProcAddress(dwmapi_lib, "DwmSetWindowAttribute");
+        DwmSetWindowAttribute_fn
+          DwmSetWindowAttribute_function = (DwmSetWindowAttribute_fn)(void (*)(void))GetProcAddress(
+            dwmapi_lib, "DwmSetWindowAttribute");
         if (DwmSetWindowAttribute_function != NULL) {
             BOOL allow_immersive_dark_mode = TRUE;
             DwmSetWindowAttribute_function(
-              window_handle, DWMWA_USE_IMMERSIVE_DARK_MODE, &allow_immersive_dark_mode, sizeof(allow_immersive_dark_mode)
-            );
+              window_handle,
+              DWMWA_USE_IMMERSIVE_DARK_MODE,
+              &allow_immersive_dark_mode,
+              sizeof(allow_immersive_dark_mode));
         }
 
         FreeLibrary(dwmapi_lib);
@@ -144,11 +146,11 @@ bool window_create_vk_surface(const window_t* self, VkInstance instance, VkSurfa
     VkWin32SurfaceCreateInfoKHR surface_create_info = {
       .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
       .hinstance = self->platform_window->instance,
-      .hwnd = self->platform_window->window
+      .hwnd = self->platform_window->window,
     };
 
-    PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR
-    )vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR");
+    PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR)
+      vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR");
 
     if (vkCreateWin32SurfaceKHR(instance, &surface_create_info, NULL, surface) != VK_SUCCESS) {
         return false;

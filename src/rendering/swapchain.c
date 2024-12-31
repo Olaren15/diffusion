@@ -3,21 +3,24 @@
 #include "core/math.h"
 #include "rendering/vk_utils.h"
 
-bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFormatKHR* chosen_format);
-bool choose_presentation_mode(const dynamic_array_t* available_modes, VkPresentModeKHR* chosen_mode);
+bool choose_surface_format(
+  const dynamic_array_t* available_formats, VkSurfaceFormatKHR* chosen_format);
+bool choose_presentation_mode(
+  const dynamic_array_t* available_modes, VkPresentModeKHR* chosen_mode);
 
 bool swapchain_init(
   swapchain_t* self,
   VkSurfaceKHR surface,
   const render_device_t* device,
   const present_capabilities_t* present_capabilities,
-  const window_t* window
-) {
-    if (!choose_surface_format(&present_capabilities->supported_surface_formats, &self->surface_format)) {
+  const window_t* window) {
+    if (!choose_surface_format(
+          &present_capabilities->supported_surface_formats, &self->surface_format)) {
         return false;
     }
 
-    if (!choose_presentation_mode(&present_capabilities->supported_present_modes, &self->present_mode)) {
+    if (!choose_presentation_mode(
+          &present_capabilities->supported_present_modes, &self->present_mode)) {
         return false;
     }
 
@@ -27,17 +30,16 @@ bool swapchain_init(
     self->extent.width = clamp_uint32_t(
       present_capabilities->vk_surface_capabilities.minImageExtent.width,
       present_capabilities->vk_surface_capabilities.maxImageExtent.width,
-      self->extent.width
-    );
+      self->extent.width);
     self->extent.height = clamp_uint32_t(
       present_capabilities->vk_surface_capabilities.minImageExtent.height,
       present_capabilities->vk_surface_capabilities.maxImageExtent.height,
-      self->extent.height
-    );
+      self->extent.height);
 
     uint32_t image_count = present_capabilities->vk_surface_capabilities.minImageCount + 1;
-    if (present_capabilities->vk_surface_capabilities.maxImageCount > 0
-        && image_count > present_capabilities->vk_surface_capabilities.maxImageCount) {
+    if (
+      present_capabilities->vk_surface_capabilities.maxImageCount > 0
+      && image_count > present_capabilities->vk_surface_capabilities.maxImageCount) {
         image_count = present_capabilities->vk_surface_capabilities.maxImageCount;
     }
 
@@ -58,7 +60,9 @@ bool swapchain_init(
       .oldSwapchain = VK_NULL_HANDLE,
     };
 
-    if (vkCreateSwapchainKHR(device->vk_device, &swapchain_create_infos, NULL, &self->vk_swapchain) != VK_SUCCESS) {
+    if (
+      vkCreateSwapchainKHR(device->vk_device, &swapchain_create_infos, NULL, &self->vk_swapchain)
+      != VK_SUCCESS) {
         return false;
     }
 
@@ -84,7 +88,9 @@ bool swapchain_init(
           .subresourceRange = subresource_range_color_all_mips,
         };
 
-        if (vkCreateImageView(device->vk_device, &image_view_create_info, NULL, image_view) != VK_SUCCESS) {
+        if (
+          vkCreateImageView(device->vk_device, &image_view_create_info, NULL, image_view)
+          != VK_SUCCESS) {
             return false;
         }
     }
@@ -106,13 +112,15 @@ void swapchain_destroy(swapchain_t* self, const render_device_t* device) {
     vkDestroySwapchainKHR(device->vk_device, self->vk_swapchain, NULL);
 }
 
-bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFormatKHR* chosen_format) {
+bool choose_surface_format(
+  const dynamic_array_t* available_formats, VkSurfaceFormatKHR* chosen_format) {
     if (available_formats->element_count == 0) {
         return false;
     }
 
     static VkSurfaceFormatKHR desired_formats[] = {
-      {.format = VK_FORMAT_A2B10G10R10_UNORM_PACK32, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR},
+      {.format = VK_FORMAT_A2B10G10R10_UNORM_PACK32,
+       .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR                                              },
       {.format = VK_FORMAT_B8G8R8A8_SRGB,            .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}
     };
 
@@ -121,8 +129,9 @@ bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFo
 
         for (size_t j = 0; j < available_formats->element_count; j++) {
             VkSurfaceFormatKHR available_format = ((VkSurfaceFormatKHR*)available_formats->data)[j];
-            if (desired_format.format == available_format.format
-                && desired_format.colorSpace == available_format.colorSpace) {
+            if (
+              desired_format.format == available_format.format
+              && desired_format.colorSpace == available_format.colorSpace) {
                 *chosen_format = available_format;
                 return true;
             }
@@ -133,7 +142,8 @@ bool choose_surface_format(const dynamic_array_t* available_formats, VkSurfaceFo
     return true;
 }
 
-bool choose_presentation_mode(const dynamic_array_t* available_modes, VkPresentModeKHR* chosen_mode) {
+bool choose_presentation_mode(
+  const dynamic_array_t* available_modes, VkPresentModeKHR* chosen_mode) {
     if (available_modes->element_count == 0) {
         return false;
     }
@@ -162,17 +172,16 @@ bool choose_presentation_mode(const dynamic_array_t* available_modes, VkPresentM
 }
 
 bool swapchain_acquire_next_image(
-  swapchain_t* self, const render_device_t* device, uint32_t wait_time, const frame_t* frame
-) {
-    if (vkAcquireNextImageKHR(
-          device->vk_device,
-          self->vk_swapchain,
-          wait_time,
-          frame->sync.swapchain_image_available_semaphore,
-          VK_NULL_HANDLE,
-          &self->current_image_index
-        )
-        != VK_SUCCESS) {
+  swapchain_t* self, const render_device_t* device, uint32_t wait_time, const frame_t* frame) {
+    if (
+      vkAcquireNextImageKHR(
+        device->vk_device,
+        self->vk_swapchain,
+        wait_time,
+        frame->sync.swapchain_image_available_semaphore,
+        VK_NULL_HANDLE,
+        &self->current_image_index)
+      != VK_SUCCESS) {
         return false;
     }
 
@@ -181,7 +190,8 @@ bool swapchain_acquire_next_image(
     return true;
 }
 
-void swapchain_prepare_current_image_for_writing(const swapchain_t* self, VkCommandBuffer command_buffer) {
+void swapchain_prepare_current_image_for_writing(
+  const swapchain_t* self, VkCommandBuffer command_buffer) {
     VkImageMemoryBarrier2 write_to_swapchain_image_barrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
       .srcStageMask = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
@@ -196,13 +206,13 @@ void swapchain_prepare_current_image_for_writing(const swapchain_t* self, VkComm
     VkDependencyInfo write_to_swapchain_image_dependency_info = {
       .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
       .imageMemoryBarrierCount = 1,
-      .pImageMemoryBarriers = &write_to_swapchain_image_barrier
-    };
+      .pImageMemoryBarriers = &write_to_swapchain_image_barrier};
 
     vkCmdPipelineBarrier2(command_buffer, &write_to_swapchain_image_dependency_info);
 }
 
-void swapchain_prepare_current_image_for_presentation(const swapchain_t* self, VkCommandBuffer command_buffer) {
+void swapchain_prepare_current_image_for_presentation(
+  const swapchain_t* self, VkCommandBuffer command_buffer) {
     VkImageMemoryBarrier2 present_swapchain_image_barrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
       .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -217,13 +227,13 @@ void swapchain_prepare_current_image_for_presentation(const swapchain_t* self, V
     VkDependencyInfo present_swapchain_image_dependency_info = {
       .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
       .imageMemoryBarrierCount = 1,
-      .pImageMemoryBarriers = &present_swapchain_image_barrier
-    };
+      .pImageMemoryBarriers = &present_swapchain_image_barrier};
 
     vkCmdPipelineBarrier2(command_buffer, &present_swapchain_image_dependency_info);
 }
 
-bool swapchain_present(const swapchain_t* self, const render_device_t* device, const frame_t* frame) {
+bool swapchain_present(
+  const swapchain_t* self, const render_device_t* device, const frame_t* frame) {
     VkPresentInfoKHR present_info = {
       .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
       .swapchainCount = 1,

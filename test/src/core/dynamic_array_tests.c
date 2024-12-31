@@ -61,7 +61,8 @@ TEST_CASE(array_too_small__dynamic_array_push__reallocates_memory_to_fit_new_ite
     const size_t initial_element_count = 3;
     const char* element_to_add = "test";
     const size_t expected_element_count = 4;
-    dynamic_array_t dynamic_array = dynamic_array_allocate_size(element_size, initial_element_count);
+    dynamic_array_t dynamic_array = dynamic_array_allocate_size(
+      element_size, initial_element_count);
 
     // when
     dynamic_array_push(&dynamic_array, &element_to_add);
@@ -81,7 +82,8 @@ TEST_CASE(array_with_free_space_dynamic_array_push__does_not_reallocate) {
     const size_t element_size = sizeof(char*);
     const size_t initial_element_count = 3;
     const char* element_to_add = "test";
-    dynamic_array_t dynamic_array = dynamic_array_allocate_size(element_size, initial_element_count);
+    dynamic_array_t dynamic_array = dynamic_array_allocate_size(
+      element_size, initial_element_count);
     dynamic_array.element_count--; // Simulate an array with one free space
 
     // when
@@ -107,7 +109,8 @@ TEST_CASE(array_too_small__dynamic_array_concat__reallocates_memory_to_fit_new_i
     const char* element_to_add_2 = "test2";
     ((const char**)other.data)[1] = element_to_add_2;
     const size_t expected_element_count = 5;
-    dynamic_array_t dynamic_array = dynamic_array_allocate_size(element_size, initial_element_count);
+    dynamic_array_t dynamic_array = dynamic_array_allocate_size(
+      element_size, initial_element_count);
 
     // when
     dynamic_array_concat(&dynamic_array, &other);
@@ -133,7 +136,8 @@ TEST_CASE(array_with_free_space_dynamic_array_concat__does_not_reallocate) {
     ((const char**)other.data)[0] = element_to_add_1;
     const char* element_to_add_2 = "test2";
     ((const char**)other.data)[1] = element_to_add_2;
-    dynamic_array_t dynamic_array = dynamic_array_allocate_size(element_size, initial_element_count);
+    dynamic_array_t dynamic_array = dynamic_array_allocate_size(
+      element_size, initial_element_count);
     dynamic_array.element_count -= 2; // Simulate an array with two free spaces
 
     // when

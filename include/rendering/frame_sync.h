@@ -20,5 +20,4 @@ bool frame_sync_init(frame_sync_t* self, const render_device_t* device);
  */
 void frame_sync_destroy(frame_sync_t* self, const render_device_t* device);
 
-
 #endif // DIFFUSION_RENDERING_FRAME_SYNC_H

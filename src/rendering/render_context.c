@@ -25,8 +25,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
   VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
   VkDebugUtilsMessageTypeFlagsEXT message_type,
   const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-  void* user_data
-);
+  void* user_data);
 
 bool render_context_init(render_context_t* self, const window_t* window) {
     if (!vulkan_load_global_functions()) {
@@ -79,10 +78,12 @@ static bool should_enable_validation_layers(void) {
     uint32_t layer_count;
     vkEnumerateInstanceLayerProperties(&layer_count, NULL);
 
-    dynamic_array_t available_instance_layers = dynamic_array_allocate_size(sizeof(VkLayerProperties), layer_count);
+    dynamic_array_t available_instance_layers = dynamic_array_allocate_size(
+      sizeof(VkLayerProperties), layer_count);
     vkEnumerateInstanceLayerProperties(&layer_count, available_instance_layers.data);
 
-    bool validation_layers_available = is_layer_available(&available_instance_layers, validation_layer_name);
+    bool validation_layers_available = is_layer_available(
+      &available_instance_layers, validation_layer_name);
 
     dynamic_array_free(&available_instance_layers);
     return validation_layers_available;
@@ -102,22 +103,22 @@ static bool is_layer_available(const dynamic_array_t* available_layers, const ch
 static VkDebugUtilsMessengerCreateInfoEXT build_debug_utils_messenger_create_info(void) {
     VkDebugUtilsMessengerCreateInfoEXT create_infos = {
       .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-      .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
+      .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+                         | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
                          | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
                          | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-      .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+      .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+                     | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
                      | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
                      | VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT,
-      .pfnUserCallback = vulkan_debug_callback
-    };
+      .pfnUserCallback = vulkan_debug_callback};
 
     return create_infos;
 }
 
 static bool render_context_create_vk_instance(render_context_t* self, const window_t* window) {
     uint32_t engine_version = VK_MAKE_API_VERSION(
-      PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH, 0
-    );
+      PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH, 0);
     VkApplicationInfo application_info = {
       .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
       .pApplicationName = PROJECT_NAME,
@@ -136,7 +137,8 @@ static bool render_context_create_vk_instance(render_context_t* self, const wind
     dynamic_array_t enabled_layers = dynamic_array_allocate(sizeof(const char*));
 
     void* next = NULL;
-    VkDebugUtilsMessengerCreateInfoEXT debug_utils_messegner_create_info = build_debug_utils_messenger_create_info();
+    VkDebugUtilsMessengerCreateInfoEXT
+      debug_utils_messegner_create_info = build_debug_utils_messenger_create_info();
 
     if (self->validation_layers_enabled) {
         dynamic_array_push(&enabled_layers, &validation_layer_name);
@@ -173,7 +175,8 @@ static bool render_context_create_debug_messenger_callback(render_context_t* sel
 
     VkDebugUtilsMessengerCreateInfoEXT create_info = build_debug_utils_messenger_create_info();
 
-    VkResult result = vkCreateDebugUtilsMessengerExt(self->vk_instance, &create_info, NULL, &self->debug_messenger);
+    VkResult result = vkCreateDebugUtilsMessengerExt(
+      self->vk_instance, &create_info, NULL, &self->debug_messenger);
     return result == VK_SUCCESS;
 }
 
@@ -181,8 +184,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
   VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
   VkDebugUtilsMessageTypeFlagsEXT message_type,
   const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-  void* user_data
-) {
+  void* user_data) {
     // Unused variables
     (void)message_type;
     (void)user_data;

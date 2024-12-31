@@ -16,20 +16,21 @@ static const char* swapchain_extension_name = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 static bool pick_physical_device(
   const render_context_t* render_context,
   const dynamic_array_t* required_extensions,
-  device_infos_t* chosen_device_infos
-);
-static device_infos_t
-  get_device_infos(VkPhysicalDevice device, VkSurfaceKHR surface, const dynamic_array_t* required_extensions);
-static void fill_device_vulkan_version_support(VkPhysicalDevice device, device_infos_t* device_infos);
+  device_infos_t* chosen_device_infos);
+static device_infos_t get_device_infos(
+  VkPhysicalDevice device, VkSurfaceKHR surface, const dynamic_array_t* required_extensions);
+static void fill_device_vulkan_version_support(
+  VkPhysicalDevice device, device_infos_t* device_infos);
 static void fill_device_extension_support(
-  VkPhysicalDevice device, const dynamic_array_t* required_extensions, device_infos_t* device_infos
-);
-static void fill_device_queues_support(VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos);
+  VkPhysicalDevice device,
+  const dynamic_array_t* required_extensions,
+  device_infos_t* device_infos);
+static void fill_device_queues_support(
+  VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos);
 static bool queue_family_supports_presenting_to_surface(
-  VkPhysicalDevice device, uint32_t queue_family_index, VkSurfaceKHR surface
-);
-static void
-  fill_device_present_capabilities(VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos);
+  VkPhysicalDevice device, uint32_t queue_family_index, VkSurfaceKHR surface);
+static void fill_device_present_capabilities(
+  VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos);
 static bool is_device_suitable(const device_infos_t* infos, bool verify_present_capabilities);
 
 bool render_device_init(render_device_t* self, const render_context_t* render_context) {
@@ -70,8 +71,10 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
       .pNext = &vulkan_1_3_features,
     };
 
-    if (vkCreateDevice(chosen_device_infos.vk_physical_device, &device_create_infos, NULL, &self->vk_device)
-        != VK_SUCCESS) {
+    if (
+      vkCreateDevice(
+        chosen_device_infos.vk_physical_device, &device_create_infos, NULL, &self->vk_device)
+      != VK_SUCCESS) {
         return false;
     }
 
@@ -80,7 +83,8 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
     self->present_capabilities = chosen_device_infos.present_capabilities;
 
     self->graphics_queue_family_index = chosen_device_infos.graphics_queue_family_index;
-    vkGetDeviceQueue(self->vk_device, chosen_device_infos.graphics_queue_family_index, 0, &self->graphics_queue);
+    vkGetDeviceQueue(
+      self->vk_device, chosen_device_infos.graphics_queue_family_index, 0, &self->graphics_queue);
 
     dynamic_array_free(&required_extensions);
 
@@ -103,8 +107,7 @@ void render_device_destroy(render_device_t* self) {
 static bool pick_physical_device(
   const render_context_t* render_context,
   const dynamic_array_t* required_extensions,
-  device_infos_t* chosen_device_infos
-) {
+  device_infos_t* chosen_device_infos) {
     uint32_t device_count = 0;
     vkEnumeratePhysicalDevices(render_context->vk_instance, &device_count, NULL);
 
@@ -112,14 +115,16 @@ static bool pick_physical_device(
         return false;
     }
 
-    dynamic_array_t physical_devices = dynamic_array_allocate_size(sizeof(VkPhysicalDevice), device_count);
+    dynamic_array_t physical_devices = dynamic_array_allocate_size(
+      sizeof(VkPhysicalDevice), device_count);
     vkEnumeratePhysicalDevices(render_context->vk_instance, &device_count, physical_devices.data);
 
     bool check_presentation_support = render_context->vk_surface != VK_NULL_HANDLE;
     for (size_t i = 0; i < physical_devices.element_count; i++) {
         VkPhysicalDevice device = ((VkPhysicalDevice*)physical_devices.data)[i];
 
-        device_infos_t infos = get_device_infos(device, render_context->vk_surface, required_extensions);
+        device_infos_t infos = get_device_infos(
+          device, render_context->vk_surface, required_extensions);
         if (is_device_suitable(&infos, check_presentation_support)) {
             *chosen_device_infos = infos;
             break;
@@ -131,8 +136,8 @@ static bool pick_physical_device(
     return true;
 }
 
-static device_infos_t
-  get_device_infos(VkPhysicalDevice device, VkSurfaceKHR surface, const dynamic_array_t* required_extensions) {
+static device_infos_t get_device_infos(
+  VkPhysicalDevice device, VkSurfaceKHR surface, const dynamic_array_t* required_extensions) {
     device_infos_t infos = {
       .vk_physical_device = device,
     };
@@ -147,21 +152,25 @@ static device_infos_t
     return infos;
 }
 
-static void fill_device_vulkan_version_support(VkPhysicalDevice device, device_infos_t* device_infos) {
+static void fill_device_vulkan_version_support(
+  VkPhysicalDevice device, device_infos_t* device_infos) {
     VkPhysicalDeviceProperties device_properties;
     vkGetPhysicalDeviceProperties(device, &device_properties);
-    if (VK_API_VERSION_MAJOR(device_properties.apiVersion) == 1
-        && VK_API_VERSION_MINOR(device_properties.apiVersion) >= 3) {
+    if (
+      VK_API_VERSION_MAJOR(device_properties.apiVersion) == 1
+      && VK_API_VERSION_MINOR(device_properties.apiVersion) >= 3) {
         device_infos->supports_minimum_vulkan_version = true;
     }
 }
 
 static void fill_device_extension_support(
-  VkPhysicalDevice device, const dynamic_array_t* required_extensions, device_infos_t* device_infos
-) {
+  VkPhysicalDevice device,
+  const dynamic_array_t* required_extensions,
+  device_infos_t* device_infos) {
     uint32_t extension_count;
     vkEnumerateDeviceExtensionProperties(device, NULL, &extension_count, NULL);
-    dynamic_array_t device_extensions = dynamic_array_allocate_size(sizeof(VkExtensionProperties), extension_count);
+    dynamic_array_t device_extensions = dynamic_array_allocate_size(
+      sizeof(VkExtensionProperties), extension_count);
     vkEnumerateDeviceExtensionProperties(device, NULL, &extension_count, device_extensions.data);
 
     bool missing_extension = false;
@@ -185,19 +194,23 @@ static void fill_device_extension_support(
     dynamic_array_free(&device_extensions);
 }
 
-static void fill_device_queues_support(VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos) {
+static void fill_device_queues_support(
+  VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos) {
     uint32_t queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, NULL);
     dynamic_array_t queue_families_props = dynamic_array_allocate_size(
-      sizeof(VkQueueFamilyProperties), queue_family_count
-    );
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families_props.data);
+      sizeof(VkQueueFamilyProperties), queue_family_count);
+    vkGetPhysicalDeviceQueueFamilyProperties(
+      device, &queue_family_count, queue_families_props.data);
 
     for (size_t i = 0; i < queue_families_props.element_count; i++) {
-        VkQueueFamilyProperties queue_family_properties = ((VkQueueFamilyProperties*)queue_families_props.data)[i];
+        VkQueueFamilyProperties queue_family_properties = ((VkQueueFamilyProperties*)
+                                                             queue_families_props.data)[i];
 
-        if (!device_infos->has_graphics_queue_family && queue_family_properties.queueFlags & VK_QUEUE_GRAPHICS_BIT
-            && queue_family_supports_presenting_to_surface(device, (uint32_t)i, surface)) {
+        if (
+          !device_infos->has_graphics_queue_family
+          && queue_family_properties.queueFlags & VK_QUEUE_GRAPHICS_BIT
+          && queue_family_supports_presenting_to_surface(device, (uint32_t)i, surface)) {
             device_infos->has_graphics_queue_family = true;
             device_infos->graphics_queue_family_index = (uint32_t)i;
         }
@@ -207,41 +220,38 @@ static void fill_device_queues_support(VkPhysicalDevice device, VkSurfaceKHR sur
 }
 
 static bool queue_family_supports_presenting_to_surface(
-  VkPhysicalDevice device, uint32_t queue_family_index, VkSurfaceKHR surface
-) {
+  VkPhysicalDevice device, uint32_t queue_family_index, VkSurfaceKHR surface) {
     if (surface == VK_NULL_HANDLE) {
         return true;
     }
 
     VkBool32 supports_surface;
-    vkGetPhysicalDeviceSurfaceSupportKHR(device, (uint32_t)queue_family_index, surface, &supports_surface);
+    vkGetPhysicalDeviceSurfaceSupportKHR(
+      device, (uint32_t)queue_family_index, surface, &supports_surface);
 
     return supports_surface;
 }
 
-static void
-  fill_device_present_capabilities(VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos) {
+static void fill_device_present_capabilities(
+  VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos) {
     present_capabilities_t present_capabilities;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &present_capabilities.vk_surface_capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+      device, surface, &present_capabilities.vk_surface_capabilities);
 
     uint32_t format_count;
     vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, NULL);
     present_capabilities.supported_surface_formats = dynamic_array_allocate_size(
-      sizeof(VkSurfaceFormatKHR), format_count
-    );
+      sizeof(VkSurfaceFormatKHR), format_count);
     vkGetPhysicalDeviceSurfaceFormatsKHR(
-      device, surface, &format_count, present_capabilities.supported_surface_formats.data
-    );
+      device, surface, &format_count, present_capabilities.supported_surface_formats.data);
 
     uint32_t present_mode_count;
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &present_mode_count, NULL);
     present_capabilities.supported_present_modes = dynamic_array_allocate_size(
-      sizeof(VkPresentModeKHR), present_mode_count
-    );
+      sizeof(VkPresentModeKHR), present_mode_count);
     vkGetPhysicalDeviceSurfacePresentModesKHR(
-      device, surface, &present_mode_count, present_capabilities.supported_present_modes.data
-    );
+      device, surface, &present_mode_count, present_capabilities.supported_present_modes.data);
 
     device_infos->present_capabilities = present_capabilities;
 }

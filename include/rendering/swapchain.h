@@ -24,8 +24,7 @@ bool swapchain_init(
   VkSurfaceKHR surface,
   const render_device_t* device,
   const present_capabilities_t* present_capabilities,
-  const window_t* window
-);
+  const window_t* window);
 
 /**
  * Destroy the swapchain
@@ -36,22 +35,24 @@ void swapchain_destroy(swapchain_t* self, const render_device_t* device);
  * Acquire the next swapchain image
  */
 bool swapchain_acquire_next_image(
-  swapchain_t* self, const render_device_t* device, uint32_t wait_time, const frame_t* frame
-);
+  swapchain_t* self, const render_device_t* device, uint32_t wait_time, const frame_t* frame);
 
 /**
  * Transition the current swapchain image to a format suitable for writing
  */
-void swapchain_prepare_current_image_for_writing(const swapchain_t* self, VkCommandBuffer command_buffer);
+void swapchain_prepare_current_image_for_writing(
+  const swapchain_t* self, VkCommandBuffer command_buffer);
 
 /**
  * Transition the current swapchain image to a format suitable for presentation
  */
-void swapchain_prepare_current_image_for_presentation(const swapchain_t* self, VkCommandBuffer command_buffer);
+void swapchain_prepare_current_image_for_presentation(
+  const swapchain_t* self, VkCommandBuffer command_buffer);
 
 /**
  * Submit the current swapchain image for presentation
  */
-bool swapchain_present(const swapchain_t* self, const render_device_t* device, const frame_t* frame);
+bool swapchain_present(
+  const swapchain_t* self, const render_device_t* device, const frame_t* frame);
 
 #endif // DIFFUSION_RENDERING_SWAPCHAIN_H
