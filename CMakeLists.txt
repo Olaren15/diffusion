@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 # Project details
 project(diffusion VERSION 0.1.0 LANGUAGES C)
@@ -12,6 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_STANDARD 99)
 include(cmake/compile_options.cmake)
 
+# Lib
 configure_file(src/project.c.in ${CMAKE_BINARY_DIR}/generated/src/project.c)
 add_library(
         ${PROJECT_NAME}
@@ -39,7 +40,15 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 find_package(Vulkan REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Vulkan::Headers)
 
-add_subdirectory(standalone)
+# Shaders
+add_subdirectory(shaders)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-shaders)
+
+# Executable
+add_executable(${PROJECT_NAME}-bin src/main.c)
+target_link_libraries(${PROJECT_NAME}-bin PUBLIC ${PROJECT_NAME})
+set_compile_options(${PROJECT_NAME}-bin)
+set_target_properties(${PROJECT_NAME}-bin PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)

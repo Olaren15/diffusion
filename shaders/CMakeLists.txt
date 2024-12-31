@@ -1,0 +1,37 @@
+﻿set(
+        SHADER_SOURCES
+        triangle.vert
+        triangle.frag
+)
+
+set(SHADER_COMMANDS)
+set(SHADER_PRODUCTS)
+
+foreach (SHADER_SOURCE IN LISTS SHADER_SOURCES)
+    cmake_path(ABSOLUTE_PATH SHADER_SOURCE NORMALIZE)
+    cmake_path(GET SHADER_SOURCE FILENAME SHADER_NAME)
+
+    cmake_path(APPEND SHADER_OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR} ${SHADER_NAME})
+    set(SHADER_OUTPUT_FILE "${SHADER_OUTPUT_FILE}.spv")
+
+    # Build command
+    list(APPEND SHADER_COMMAND COMMAND)
+    list(APPEND SHADER_COMMAND Vulkan::glslc)
+    list(APPEND SHADER_COMMAND "${SHADER_SOURCE}")
+    list(APPEND SHADER_COMMAND "-o")
+    list(APPEND SHADER_COMMAND ${SHADER_OUTPUT_FILE})
+
+    list(APPEND SHADER_COMMANDS ${SHADER_COMMAND})
+
+    # Add product
+    list(APPEND SHADER_PRODUCTS ${SHADER_OUTPUT_FILE})
+
+endforeach ()
+
+add_custom_target(
+        ${PROJECT_NAME}-shaders
+        COMMAND ${SHADER_COMMANDS}
+        COMMENT "Compiling shaders"
+        BYPRODUCTS ${SHADER_PRODUCTS}
+        SOURCES ${SHADER_SOURCE_FILES}
+)
