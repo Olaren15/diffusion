@@ -27,12 +27,7 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
-    if (!swapchain_init(
-          &self->swapchain,
-          self->render_context.vk_surface,
-          &self->render_device,
-          &self->render_device.present_capabilities,
-          &self->window)) {
+    if (!swapchain_init(&self->swapchain, &self->render_context, &self->render_device)) {
         return false;
     }
 
@@ -41,10 +36,19 @@ bool engine_init(engine_t* self) {
         frame_init(self->frames + i, &self->render_device);
     }
 
+    if (!triangle_pipeline_create(
+          &self->triangle_pipeline, &self->render_device, self->swapchain.surface_format.format)) {
+        return false;
+    }
+
     return true;
 }
 
 void engine_destroy(engine_t* self) {
+    vkDeviceWaitIdle(self->render_device.vk_device);
+
+    triangle_pipeline_destroy(&self->triangle_pipeline, &self->render_device);
+
     for (size_t i = 0; i < ENGINE_MAX_FRAMES_IN_FLIGHT; i++) {
         frame_destroy(self->frames + i, &self->render_device);
     }
@@ -84,19 +88,65 @@ static bool engine_iterate(engine_t* self) {
         return false;
     }
 
+    if (self->swapchain.out_of_date) {
+        render_device_update_present_capabilities(&self->render_device, &self->render_context);
+        swapchain_recreate(&self->swapchain, &self->render_context, &self->render_device);
+        return true;
+    }
+
     if (!frame_begin_new(current_frame, &self->render_device)) {
         return false;
     }
 
     swapchain_prepare_current_image_for_writing(&self->swapchain, current_frame->command_buffer);
 
-    vkCmdClearColorImage(
+    VkRenderingAttachmentInfo color_attachment = {
+      .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+      .imageView = self->swapchain.current_image_view,
+      .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+      .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+      .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+      .clearValue = {clear_color_white_unorm},
+    };
+
+    VkRect2D whole_frame_rect = {
+      .extent = self->swapchain.extent,
+      .offset =
+        {
+                 .x = 0,
+                 .y = 0,
+                 },
+    };
+
+    VkRenderingInfo rendering_info = {
+      .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+      .renderArea = whole_frame_rect,
+      .layerCount = 1,
+      .colorAttachmentCount = 1,
+      .pColorAttachments = &color_attachment,
+    };
+
+    vkCmdBeginRendering(current_frame->command_buffer, &rendering_info);
+
+    vkCmdBindPipeline(
       current_frame->command_buffer,
-      self->swapchain.current_image,
-      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-      &clear_color_white_unorm,
-      1,
-      &subresource_range_color_all_mips);
+      VK_PIPELINE_BIND_POINT_GRAPHICS,
+      self->triangle_pipeline.vk_pipeline);
+
+    VkViewport viewport = {
+      .x = 0.0f,
+      .y = 0.0f,
+      .width = (float)self->swapchain.extent.width,
+      .height = (float)self->swapchain.extent.height,
+      .minDepth = 0.0f,
+      .maxDepth = 1.0f,
+    };
+    vkCmdSetViewport(current_frame->command_buffer, 0, 1, &viewport);
+    vkCmdSetScissor(current_frame->command_buffer, 0, 1, &whole_frame_rect);
+
+    vkCmdDraw(current_frame->command_buffer, 3, 1, 0, 0);
+
+    vkCmdEndRendering(current_frame->command_buffer);
 
     swapchain_prepare_current_image_for_presentation(
       &self->swapchain, current_frame->command_buffer);
@@ -107,6 +157,11 @@ static bool engine_iterate(engine_t* self) {
 
     if (!swapchain_present(&self->swapchain, &self->render_device, current_frame)) {
         return false;
+    }
+
+    if (self->swapchain.out_of_date || self->swapchain.suboptimal) {
+        render_device_update_present_capabilities(&self->render_device, &self->render_context);
+        swapchain_recreate(&self->swapchain, &self->render_context, &self->render_device);
     }
 
     return true;

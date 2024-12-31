@@ -82,10 +82,22 @@ extern PFN_vkDestroyFence vkDestroyFence;
 extern PFN_vkCreateSemaphore vkCreateSemaphore;
 extern PFN_vkDestroySemaphore vkDestroySemaphore;
 extern PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+extern PFN_vkEndCommandBuffer vkEndCommandBuffer;
 extern PFN_vkCmdPipelineBarrier2 vkCmdPipelineBarrier2;
 extern PFN_vkCmdClearColorImage vkCmdClearColorImage;
-extern PFN_vkEndCommandBuffer vkEndCommandBuffer;
+extern PFN_vkCmdBeginRendering vkCmdBeginRendering;
+extern PFN_vkCmdEndRendering vkCmdEndRendering;
+extern PFN_vkCmdBindPipeline vkCmdBindPipeline;
+extern PFN_vkCmdSetViewport vkCmdSetViewport;
+extern PFN_vkCmdSetScissor vkCmdSetScissor;
+extern PFN_vkCmdDraw vkCmdDraw;
 extern PFN_vkQueueSubmit2 vkQueueSubmit2;
 extern PFN_vkQueuePresentKHR vkQueuePresentKHR;
+extern PFN_vkCreateShaderModule vkCreateShaderModule;
+extern PFN_vkDestroyShaderModule vkDestroyShaderModule;
+extern PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+extern PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+extern PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
+extern PFN_vkDestroyPipeline vkDestroyPipeline;
 
 #endif // DIFFUSION_PLATFORM_VULKAN_H

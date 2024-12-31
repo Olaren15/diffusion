@@ -80,6 +80,7 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
 
     vulkan_load_device_functions(self->vk_device);
 
+    self->physical_device = chosen_device_infos.vk_physical_device,
     self->present_capabilities = chosen_device_infos.present_capabilities;
 
     self->graphics_queue_family_index = chosen_device_infos.graphics_queue_family_index;
@@ -92,8 +93,6 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
 }
 
 void render_device_destroy(render_device_t* self) {
-    vkDeviceWaitIdle(self->vk_device);
-
     vkDestroyDevice(self->vk_device, NULL);
     vulkan_release_device_functions();
 
@@ -102,6 +101,15 @@ void render_device_destroy(render_device_t* self) {
 
     self->vk_device = VK_NULL_HANDLE;
     self->graphics_queue = VK_NULL_HANDLE;
+}
+
+void render_device_update_present_capabilities(
+  render_device_t* self, const render_context_t* render_context) {
+    device_infos_t device_infos;
+    fill_device_present_capabilities(
+      self->physical_device, render_context->vk_surface, &device_infos);
+
+    self->present_capabilities = device_infos.present_capabilities;
 }
 
 static bool pick_physical_device(

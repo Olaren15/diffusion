@@ -21,6 +21,7 @@ add_library(
         src/engine.c
 
         src/core/dynamic_array.c
+        src/core/file.c
         src/core/math.c
 
         src/platform/win32/window.c
@@ -32,6 +33,7 @@ add_library(
         src/rendering/render_context.c
         src/rendering/render_device.c
         src/rendering/swapchain.c
+        src/rendering/triangle_pipeline.c
         src/rendering/vk_utils.c
 )
 target_include_directories(${PROJECT_NAME} PUBLIC include)

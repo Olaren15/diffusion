@@ -3,6 +3,7 @@
 
 #include "platform/vulkan.h"
 #include "rendering/frame.h"
+#include "rendering/render_context.h"
 #include "rendering/render_device.h"
 
 typedef struct swapchain_s {
@@ -14,17 +15,22 @@ typedef struct swapchain_s {
     dynamic_array_t image_views; // VkImageView
     uint32_t current_image_index;
     VkImage current_image;
+    VkImageView current_image_view;
+    bool suboptimal;
+    bool out_of_date;
 } swapchain_t;
 
 /**
  * Initialises a swapchain
  */
 bool swapchain_init(
-  swapchain_t* self,
-  VkSurfaceKHR surface,
-  const render_device_t* device,
-  const present_capabilities_t* present_capabilities,
-  const window_t* window);
+  swapchain_t* self, const render_context_t* context, const render_device_t* device);
+
+/**
+ * Recreates the swapchain
+ */
+bool swapchain_recreate(
+  swapchain_t* self, const render_context_t* context, const render_device_t* device);
 
 /**
  * Destroy the swapchain
@@ -52,7 +58,6 @@ void swapchain_prepare_current_image_for_presentation(
 /**
  * Submit the current swapchain image for presentation
  */
-bool swapchain_present(
-  const swapchain_t* self, const render_device_t* device, const frame_t* frame);
+bool swapchain_present(swapchain_t* self, const render_device_t* device, const frame_t* frame);
 
 #endif // DIFFUSION_RENDERING_SWAPCHAIN_H

@@ -3,49 +3,77 @@
 #include "core/math.h"
 #include "rendering/vk_utils.h"
 
+bool swapchain_init_impl(
+  swapchain_t* self,
+  const render_context_t* context,
+  const render_device_t* device,
+  VkSwapchainKHR previous_swapchain);
 bool choose_surface_format(
   const dynamic_array_t* available_formats, VkSurfaceFormatKHR* chosen_format);
 bool choose_presentation_mode(
   const dynamic_array_t* available_modes, VkPresentModeKHR* chosen_mode);
+void destroy_swapchain_resources(swapchain_t* self, const render_device_t* device);
 
 bool swapchain_init(
+  swapchain_t* self, const render_context_t* context, const render_device_t* device) {
+    return swapchain_init_impl(self, context, device, VK_NULL_HANDLE);
+}
+
+bool swapchain_recreate(
+  swapchain_t* self, const render_context_t* context, const render_device_t* device) {
+    VkSwapchainKHR old_swapchain = self->vk_swapchain;
+
+    destroy_swapchain_resources(self, device);
+
+    if (!swapchain_init_impl(self, context, device, old_swapchain)) {
+        return false;
+    }
+
+    vkDestroySwapchainKHR(device->vk_device, old_swapchain, NULL);
+
+    return true;
+}
+
+void swapchain_destroy(swapchain_t* self, const render_device_t* device) {
+    destroy_swapchain_resources(self, device);
+
+    vkDestroySwapchainKHR(device->vk_device, self->vk_swapchain, NULL);
+}
+
+bool swapchain_init_impl(
   swapchain_t* self,
-  VkSurfaceKHR surface,
+  const render_context_t* context,
   const render_device_t* device,
-  const present_capabilities_t* present_capabilities,
-  const window_t* window) {
+  VkSwapchainKHR previous_swapchain) {
     if (!choose_surface_format(
-          &present_capabilities->supported_surface_formats, &self->surface_format)) {
+          &device->present_capabilities.supported_surface_formats, &self->surface_format)) {
         return false;
     }
 
     if (!choose_presentation_mode(
-          &present_capabilities->supported_present_modes, &self->present_mode)) {
+          &device->present_capabilities.supported_present_modes, &self->present_mode)) {
         return false;
     }
 
-    if (!window_get_dimensions_pixels(window, &self->extent.width, &self->extent.height)) {
-        return false;
-    }
     self->extent.width = clamp_uint32_t(
-      present_capabilities->vk_surface_capabilities.minImageExtent.width,
-      present_capabilities->vk_surface_capabilities.maxImageExtent.width,
-      self->extent.width);
+      device->present_capabilities.vk_surface_capabilities.minImageExtent.width,
+      device->present_capabilities.vk_surface_capabilities.maxImageExtent.width,
+      device->present_capabilities.vk_surface_capabilities.currentExtent.width);
     self->extent.height = clamp_uint32_t(
-      present_capabilities->vk_surface_capabilities.minImageExtent.height,
-      present_capabilities->vk_surface_capabilities.maxImageExtent.height,
-      self->extent.height);
+      device->present_capabilities.vk_surface_capabilities.minImageExtent.height,
+      device->present_capabilities.vk_surface_capabilities.maxImageExtent.height,
+      device->present_capabilities.vk_surface_capabilities.currentExtent.height);
 
-    uint32_t image_count = present_capabilities->vk_surface_capabilities.minImageCount + 1;
+    uint32_t image_count = device->present_capabilities.vk_surface_capabilities.minImageCount + 1;
     if (
-      present_capabilities->vk_surface_capabilities.maxImageCount > 0
-      && image_count > present_capabilities->vk_surface_capabilities.maxImageCount) {
-        image_count = present_capabilities->vk_surface_capabilities.maxImageCount;
+      device->present_capabilities.vk_surface_capabilities.maxImageCount > 0
+      && image_count > device->present_capabilities.vk_surface_capabilities.maxImageCount) {
+        image_count = device->present_capabilities.vk_surface_capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR swapchain_create_infos = {
       .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-      .surface = surface,
+      .surface = context->vk_surface,
       .minImageCount = image_count,
       .imageFormat = self->surface_format.format,
       .imageColorSpace = self->surface_format.colorSpace,
@@ -53,11 +81,11 @@ bool swapchain_init(
       .imageArrayLayers = 1,
       .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
       .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-      .preTransform = present_capabilities->vk_surface_capabilities.currentTransform,
+      .preTransform = device->present_capabilities.vk_surface_capabilities.currentTransform,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
       .presentMode = self->present_mode,
       .clipped = VK_TRUE,
-      .oldSwapchain = VK_NULL_HANDLE,
+      .oldSwapchain = previous_swapchain,
     };
 
     if (
@@ -95,21 +123,10 @@ bool swapchain_init(
         }
     }
 
+    self->suboptimal = false;
+    self->out_of_date = false;
+
     return true;
-}
-
-void swapchain_destroy(swapchain_t* self, const render_device_t* device) {
-    vkDeviceWaitIdle(device->vk_device);
-
-    for (size_t i = 0; i < self->image_views.element_count; i++) {
-        VkImageView image_view = ((VkImageView*)self->image_views.data)[i];
-        vkDestroyImageView(device->vk_device, image_view, NULL);
-    }
-
-    dynamic_array_free(&self->image_views);
-    dynamic_array_free(&self->images);
-
-    vkDestroySwapchainKHR(device->vk_device, self->vk_swapchain, NULL);
 }
 
 bool choose_surface_format(
@@ -171,21 +188,50 @@ bool choose_presentation_mode(
     return true;
 }
 
+void destroy_swapchain_resources(swapchain_t* self, const render_device_t* device) {
+    vkDeviceWaitIdle(device->vk_device);
+
+    for (size_t i = 0; i < self->image_views.element_count; i++) {
+        VkImageView image_view = ((VkImageView*)self->image_views.data)[i];
+        vkDestroyImageView(device->vk_device, image_view, NULL);
+        image_view = VK_NULL_HANDLE;
+    }
+
+    dynamic_array_free(&self->image_views);
+    dynamic_array_free(&self->images);
+
+    self->surface_format = (VkSurfaceFormatKHR){.format = 0, .colorSpace = 0};
+    self->present_mode = 0;
+    self->extent = (VkExtent2D){.width = 0, .height = 0};
+    self->suboptimal = false;
+    self->out_of_date = false;
+}
+
 bool swapchain_acquire_next_image(
   swapchain_t* self, const render_device_t* device, uint32_t wait_time, const frame_t* frame) {
-    if (
-      vkAcquireNextImageKHR(
-        device->vk_device,
-        self->vk_swapchain,
-        wait_time,
-        frame->sync.swapchain_image_available_semaphore,
-        VK_NULL_HANDLE,
-        &self->current_image_index)
-      != VK_SUCCESS) {
-        return false;
+    VkResult result = vkAcquireNextImageKHR(
+      device->vk_device,
+      self->vk_swapchain,
+      wait_time,
+      frame->sync.swapchain_image_available_semaphore,
+      VK_NULL_HANDLE,
+      &self->current_image_index);
+
+    switch (result) {
+        case VK_SUCCESS:
+            break;
+        case VK_SUBOPTIMAL_KHR:
+            self->suboptimal = true;
+            break;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+            self->out_of_date = true;
+            break;
+        default:
+            return false;
     }
 
     self->current_image = ((VkImage*)self->images.data)[self->current_image_index];
+    self->current_image_view = ((VkImageView*)self->image_views.data)[self->current_image_index];
 
     return true;
 }
@@ -232,8 +278,7 @@ void swapchain_prepare_current_image_for_presentation(
     vkCmdPipelineBarrier2(command_buffer, &present_swapchain_image_dependency_info);
 }
 
-bool swapchain_present(
-  const swapchain_t* self, const render_device_t* device, const frame_t* frame) {
+bool swapchain_present(swapchain_t* self, const render_device_t* device, const frame_t* frame) {
     VkPresentInfoKHR present_info = {
       .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
       .swapchainCount = 1,
@@ -243,8 +288,18 @@ bool swapchain_present(
       .pImageIndices = &self->current_image_index,
     };
 
-    if (vkQueuePresentKHR(device->graphics_queue, &present_info) != VK_SUCCESS) {
-        return false;
+    VkResult result = vkQueuePresentKHR(device->graphics_queue, &present_info);
+    switch (result) {
+        case VK_SUCCESS:
+            break;
+        case VK_SUBOPTIMAL_KHR:
+            self->suboptimal = true;
+            break;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+            self->out_of_date = true;
+            break;
+        default:
+            return false;
     }
 
     return true;

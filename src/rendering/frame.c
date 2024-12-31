@@ -32,8 +32,6 @@ bool frame_init(frame_t* self, const render_device_t* device) {
 }
 
 void frame_destroy(frame_t* self, const render_device_t* device) {
-    vkDeviceWaitIdle(device->vk_device);
-
     frame_sync_destroy(&self->sync, device);
     vkDestroyCommandPool(device->vk_device, self->command_pool, NULL);
 }
@@ -46,14 +44,14 @@ bool frame_wait_for_render_completed(
         return false;
     }
 
-    if (vkResetFences(device->vk_device, 1, &self->sync.render_completed_fence) != VK_SUCCESS) {
-        return false;
-    }
-
     return true;
 }
 
 bool frame_begin_new(frame_t* self, const render_device_t* device) {
+    if (vkResetFences(device->vk_device, 1, &self->sync.render_completed_fence) != VK_SUCCESS) {
+        return false;
+    }
+
     if (vkResetCommandPool(device->vk_device, self->command_pool, 0) != VK_SUCCESS) {
         return false;
     }

@@ -74,6 +74,10 @@ extern int tests_failed;
 
 #define TEST_MAIN_IMPL                                                           \
     int main(int argc, char** argv) {                                            \
+        /* unused */                                                             \
+        (void)argc;                                                              \
+        (void)argv;                                                              \
+                                                                                 \
         all_tests();                                                             \
                                                                                  \
         if (tests_failed != 0) {                                                 \

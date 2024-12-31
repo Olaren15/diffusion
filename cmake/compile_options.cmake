@@ -55,6 +55,10 @@
         message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
     endif ()
 
-    target_compile_options(${PROJECT_NAME} PRIVATE ${PROJECT_WARNINGS})
+    if (MSVC)
+        target_compile_definitions(${target} PRIVATE -D_CRT_SECURE_NO_WARNINGS)
+    endif ()
+
+    target_compile_options(${target} PRIVATE ${PROJECT_WARNINGS})
 
 endfunction()

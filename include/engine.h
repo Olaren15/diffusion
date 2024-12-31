@@ -6,6 +6,7 @@
 #include "rendering/render_context.h"
 #include "rendering/render_device.h"
 #include "rendering/swapchain.h"
+#include "rendering/triangle_pipeline.h"
 
 #include <stdbool.h>
 
@@ -18,6 +19,7 @@ typedef struct engine_s {
     swapchain_t swapchain;
     uint32_t current_frame;
     frame_t frames[ENGINE_MAX_FRAMES_IN_FLIGHT];
+    triangle_pipeline_t triangle_pipeline;
 } engine_t;
 
 /**

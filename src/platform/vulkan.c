@@ -89,13 +89,31 @@ void vulkan_load_device_functions(VkDevice device) {
     vkDestroySemaphore = (PFN_vkDestroySemaphore)vkGetDeviceProcAddr(device, "vkDestroySemaphore");
     vkBeginCommandBuffer = (PFN_vkBeginCommandBuffer)vkGetDeviceProcAddr(
       device, "vkBeginCommandBuffer");
+    vkEndCommandBuffer = (PFN_vkEndCommandBuffer)vkGetDeviceProcAddr(device, "vkEndCommandBuffer");
     vkCmdPipelineBarrier2 = (PFN_vkCmdPipelineBarrier2)vkGetDeviceProcAddr(
       device, "vkCmdPipelineBarrier2");
     vkCmdClearColorImage = (PFN_vkCmdClearColorImage)vkGetDeviceProcAddr(
       device, "vkCmdClearColorImage");
-    vkEndCommandBuffer = (PFN_vkEndCommandBuffer)vkGetDeviceProcAddr(device, "vkEndCommandBuffer");
+    vkCmdBeginRendering = (PFN_vkCmdBeginRendering)vkGetDeviceProcAddr(
+      device, "vkCmdBeginRendering");
+    vkCmdEndRendering = (PFN_vkCmdEndRendering)vkGetDeviceProcAddr(device, "vkCmdEndRendering");
+    vkCmdBindPipeline = (PFN_vkCmdBindPipeline)vkGetDeviceProcAddr(device, "vkCmdBindPipeline");
+    vkCmdSetViewport = (PFN_vkCmdSetViewport)vkGetDeviceProcAddr(device, "vkCmdSetViewport");
+    vkCmdSetScissor = (PFN_vkCmdSetScissor)vkGetDeviceProcAddr(device, "vkCmdSetScissor");
+    vkCmdDraw = (PFN_vkCmdDraw)vkGetDeviceProcAddr(device, "vkCmdDraw");
     vkQueueSubmit2 = (PFN_vkQueueSubmit2)vkGetDeviceProcAddr(device, "vkQueueSubmit2");
     vkQueuePresentKHR = (PFN_vkQueuePresentKHR)vkGetDeviceProcAddr(device, "vkQueuePresentKHR");
+    vkCreateShaderModule = (PFN_vkCreateShaderModule)vkGetDeviceProcAddr(
+      device, "vkCreateShaderModule");
+    vkDestroyShaderModule = (PFN_vkDestroyShaderModule)vkGetDeviceProcAddr(
+      device, "vkDestroyShaderModule");
+    vkCreatePipelineLayout = (PFN_vkCreatePipelineLayout)vkGetDeviceProcAddr(
+      device, "vkCreatePipelineLayout");
+    vkDestroyPipelineLayout = (PFN_vkDestroyPipelineLayout)vkGetDeviceProcAddr(
+      device, "vkDestroyPipelineLayout");
+    vkCreateGraphicsPipelines = (PFN_vkCreateGraphicsPipelines)vkGetDeviceProcAddr(
+      device, "vkCreateGraphicsPipelines");
+    vkDestroyPipeline = (PFN_vkDestroyPipeline)vkGetDeviceProcAddr(device, "vkDestroyPipeline");
 }
 
 void vulkan_release_global_functions(void) {
@@ -147,11 +165,23 @@ void vulkan_release_device_functions(void) {
     vkCreateSemaphore = NULL;
     vkDestroySemaphore = NULL;
     vkBeginCommandBuffer = NULL;
+    vkEndCommandBuffer = NULL;
     vkCmdPipelineBarrier2 = NULL;
     vkCmdClearColorImage = NULL;
-    vkEndCommandBuffer = NULL;
+    vkCmdBeginRendering = NULL;
+    vkCmdEndRendering = NULL;
+    vkCmdBindPipeline = NULL;
+    vkCmdSetViewport = NULL;
+    vkCmdSetScissor = NULL;
+    vkCmdDraw = NULL;
     vkQueueSubmit2 = NULL;
     vkQueuePresentKHR = NULL;
+    vkCreateShaderModule = NULL;
+    vkDestroyShaderModule = NULL;
+    vkCreatePipelineLayout = NULL;
+    vkDestroyPipelineLayout = NULL;
+    vkCreateGraphicsPipelines = NULL;
+    vkDestroyPipeline = NULL;
 }
 
 // Global functions
@@ -196,8 +226,20 @@ PFN_vkDestroyFence vkDestroyFence = NULL;
 PFN_vkCreateSemaphore vkCreateSemaphore = NULL;
 PFN_vkDestroySemaphore vkDestroySemaphore = NULL;
 PFN_vkBeginCommandBuffer vkBeginCommandBuffer = NULL;
+PFN_vkEndCommandBuffer vkEndCommandBuffer = NULL;
 PFN_vkCmdPipelineBarrier2 vkCmdPipelineBarrier2 = NULL;
 PFN_vkCmdClearColorImage vkCmdClearColorImage = NULL;
-PFN_vkEndCommandBuffer vkEndCommandBuffer = NULL;
+PFN_vkCmdBeginRendering vkCmdBeginRendering = NULL;
+PFN_vkCmdEndRendering vkCmdEndRendering = NULL;
+PFN_vkCmdBindPipeline vkCmdBindPipeline = NULL;
+PFN_vkCmdSetViewport vkCmdSetViewport = NULL;
+PFN_vkCmdSetScissor vkCmdSetScissor = NULL;
+PFN_vkCmdDraw vkCmdDraw = NULL;
 PFN_vkQueueSubmit2 vkQueueSubmit2 = NULL;
 PFN_vkQueuePresentKHR vkQueuePresentKHR = NULL;
+PFN_vkCreateShaderModule vkCreateShaderModule = NULL;
+PFN_vkDestroyShaderModule vkDestroyShaderModule = NULL;
+PFN_vkCreatePipelineLayout vkCreatePipelineLayout = NULL;
+PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout = NULL;
+PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines = NULL;
+PFN_vkDestroyPipeline vkDestroyPipeline = NULL;
