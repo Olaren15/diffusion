@@ -1,6 +1,6 @@
 ﻿#include "platform/win32/win32_utils.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <stdlib.h>
 
@@ -15,4 +15,4 @@ wchar_t* win32_create_wide_string_from_uti8_string(const char* utf8_string) {
 
     return wide_string;
 }
-#endif
+#endif // _WIN32

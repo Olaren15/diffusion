@@ -1,15 +1,15 @@
 ﻿#include "platform/vulkan.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "platform/win32/win32_types.h"
 
 #include <vulkan/vulkan_win32.h>
-#endif
+#endif // _WIN32
 
 static void* loaded_library = NULL;
 
 bool vulkan_load_global_functions(void) {
-#ifdef WIN32
+#ifdef _WIN32
     HMODULE library = LoadLibraryW(L"vulkan-1.dll");
     if (library == NULL) {
         return false;
@@ -18,7 +18,7 @@ bool vulkan_load_global_functions(void) {
     vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)(void (*)(void))GetProcAddress(
       library, "vkGetInstanceProcAddr");
     loaded_library = library;
-#endif
+#endif // _WIN32
 
     if (vkGetInstanceProcAddr == NULL) {
         return false;
@@ -120,9 +120,9 @@ void vulkan_release_global_functions(void) {
     vkCreateInstance = NULL;
     vkEnumerateInstanceLayerProperties = NULL;
 
-#ifdef WIN32
+#ifdef _WIN32
     FreeLibrary(loaded_library);
-#endif
+#endif // _WIN32
 
     loaded_library = NULL;
 }

@@ -1,9 +1,13 @@
 ﻿#ifndef DIFFUSION_PLATFORM_WIN32_TYPES_H
 #define DIFFUSION_PLATFORM_WIN32_TYPES_H
 
+#ifdef _WIN32
+
 #define WIN32_LEAN_AND_MEAN
 #define UNICODE
 #define _UNICODE
+
 #include <Windows.h>
 
+#endif // _WIN32
 #endif // DIFFUSION_PLATFORM_WIN32_TYPES_H

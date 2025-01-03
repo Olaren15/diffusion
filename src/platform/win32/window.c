@@ -1,6 +1,6 @@
 ﻿#include "platform/window.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "event.h"
 #include "platform/vulkan.h"
@@ -193,4 +193,4 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
     return DefWindowProc(window, message, w_param, l_param);
 }
 
-#endif
+#endif // _WIN32
