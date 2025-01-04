@@ -1,6 +1,8 @@
 ﻿#ifndef DIFFUSION_CORE_DYNAMIC_ARRAY_H
 #define DIFFUSION_CORE_DYNAMIC_ARRAY_H
 
+#include "core/slice.h"
+
 #include <stdint.h>
 
 typedef struct dynamic_array_s {
@@ -36,6 +38,8 @@ dynamic_array_t dynamic_array_allocate_size(size_t element_size, size_t element_
  */
 void dynamic_array_free(dynamic_array_t* self);
 
+dynamic_array_t dynamic_array_from(slice_t other);
+
 /**
  * Push an element to the end of the array
  *
@@ -43,6 +47,13 @@ void dynamic_array_free(dynamic_array_t* self);
  * @param element a pointer to the element that should be added
  */
 void dynamic_array_push(dynamic_array_t* self, const void* element);
+
+/**
+ * Extends the array by `element_count`. The new elements are not initialised
+ *
+ * @returns the index where the new elements start
+ */
+size_t dynamic_array_extend(dynamic_array_t* self, size_t element_count);
 
 void dynamic_array_concat(dynamic_array_t* self, const dynamic_array_t* other);
 

@@ -1,11 +1,29 @@
 ﻿#include "engine.h"
 
 #include "project.h"
+#include "rendering/model/mesh.h"
 #include "rendering/vk_utils.h"
 
 const uint32_t DEFAULT_WIDTH = 1920;
 const uint32_t DEFAULT_HEIGHT = 1080;
 const uint32_t MAX_FRAME_WAIT_TIME = 10000000; // 1 second
+
+const vertex_t TRIANGLE_VERTICES[] = {
+  {
+   .position = {.x = 0.0f, .y = -0.5f, .z = 0.0f},
+   .color = {.r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
+   },
+  {
+   .position = {.x = 0.5f, .y = 0.5f, .z = 0.0f},
+   .color = {.r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f},
+   },
+  {
+   .position = {.x = -0.5f, .y = 0.5f, .z = 0.0f},
+   .color = {.r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f},
+   }
+};
+
+const uint32_t TRIANGLE_INDICES[] = {0, 1, 2};
 
 /*
  * Do one iteration (frame) worth of stuff
@@ -27,6 +45,14 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
+    if (!rebar_gpu_allocator_available(&self->render_device)) {
+        return false;
+    }
+
+    if (!rebar_gpu_allocator_init(&self->gpu_allocator, &self->render_device)) {
+        return false;
+    }
+
     if (!swapchain_init(&self->swapchain, &self->render_context, &self->render_device)) {
         return false;
     }
@@ -41,11 +67,32 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
+    mesh_t triangle_mesh = {
+      .vertices = dynamic_array_from((slice_t){
+        .first_element = &TRIANGLE_VERTICES,
+        .element_count = 3,
+        .element_size = sizeof(vertex_t),
+      }),
+      .indices = dynamic_array_from((slice_t){
+        .first_element = &TRIANGLE_INDICES,
+        .element_count = 3,
+        .element_size = sizeof(uint32_t),
+      }),
+    };
+
+    gpu_mesh_create(
+      &self->triangle_mesh, &triangle_mesh, &self->render_device, &self->gpu_allocator);
+
+    dynamic_array_free(&triangle_mesh.vertices);
+    dynamic_array_free(&triangle_mesh.indices);
+
     return true;
 }
 
 void engine_destroy(engine_t* self) {
     vkDeviceWaitIdle(self->render_device.vk_device);
+
+    gpu_mesh_destroy(&self->triangle_mesh, &self->render_device, &self->gpu_allocator);
 
     triangle_pipeline_destroy(&self->triangle_pipeline, &self->render_device);
 
@@ -54,6 +101,7 @@ void engine_destroy(engine_t* self) {
     }
 
     swapchain_destroy(&self->swapchain, &self->render_device);
+    rebar_gpu_allocator_destroy(&self->gpu_allocator, &self->render_device);
     render_device_destroy(&self->render_device);
     render_context_destroy(&self->render_context);
     window_destroy(&self->window);
@@ -144,7 +192,20 @@ static bool engine_iterate(engine_t* self) {
     vkCmdSetViewport(current_frame->command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(current_frame->command_buffer, 0, 1, &whole_frame_rect);
 
-    vkCmdDraw(current_frame->command_buffer, 3, 1, 0, 0);
+    VkDeviceSize buffer_offset = 0;
+    vkCmdBindVertexBuffers(
+      current_frame->command_buffer,
+      0,
+      1,
+      &self->triangle_mesh.vertex_buffer.buffer,
+      &buffer_offset);
+    vkCmdBindIndexBuffer(
+      current_frame->command_buffer,
+      self->triangle_mesh.index_buffer.buffer,
+      0,
+      VK_INDEX_TYPE_UINT32);
+
+    vkCmdDrawIndexed(current_frame->command_buffer, self->triangle_mesh.index_count, 1, 0, 0, 0);
 
     vkCmdEndRendering(current_frame->command_buffer);
 

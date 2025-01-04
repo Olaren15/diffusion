@@ -1,6 +1,7 @@
 ﻿#include "rendering/triangle_pipeline.h"
 
 #include "core/file.h"
+#include "rendering/model/vertex.h"
 
 bool create_shader_module(
   const char* shader_path, const render_device_t* device, VkShaderModule* shader_module);
@@ -40,8 +41,29 @@ bool triangle_pipeline_create(
     VkPipelineShaderStageCreateInfo shader_stages[] = {
       vertex_shader_stage_info, fragment_shader_stage_info};
 
+    VkVertexInputBindingDescription vertex_input_binding_description = {
+      .binding = 0,
+      .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+      .stride = sizeof(vertex_t),
+    };
+
+    VkVertexInputAttributeDescription vertex_input_attribute_descriptions[] = {
+      {.binding = 0,
+       .location = 0,
+       .format = VK_FORMAT_R32G32B32_SFLOAT,
+       .offset = offsetof(vertex_t, position)},
+      {.binding = 0,
+       .location = 1,
+       .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+       .offset = offsetof(vertex_t, color)   }
+    };
+
     VkPipelineVertexInputStateCreateInfo vertex_input_state = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+      .vertexBindingDescriptionCount = 1,
+      .pVertexBindingDescriptions = &vertex_input_binding_description,
+      .vertexAttributeDescriptionCount = 2,
+      .pVertexAttributeDescriptions = vertex_input_attribute_descriptions,
     };
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {

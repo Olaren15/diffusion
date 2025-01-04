@@ -8,6 +8,8 @@ typedef struct device_infos_s {
     present_capabilities_t present_capabilities;
     bool supports_required_extensions;
     bool supports_minimum_vulkan_version;
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    VkPhysicalDeviceLimits limits;
     VkPhysicalDevice vk_physical_device;
 } device_infos_t;
 
@@ -19,8 +21,7 @@ static bool pick_physical_device(
   device_infos_t* chosen_device_infos);
 static device_infos_t get_device_infos(
   VkPhysicalDevice device, VkSurfaceKHR surface, const dynamic_array_t* required_extensions);
-static void fill_device_vulkan_version_support(
-  VkPhysicalDevice device, device_infos_t* device_infos);
+static void fill_device_properties(VkPhysicalDevice device, device_infos_t* device_infos);
 static void fill_device_extension_support(
   VkPhysicalDevice device,
   const dynamic_array_t* required_extensions,
@@ -31,6 +32,7 @@ static bool queue_family_supports_presenting_to_surface(
   VkPhysicalDevice device, uint32_t queue_family_index, VkSurfaceKHR surface);
 static void fill_device_present_capabilities(
   VkPhysicalDevice device, VkSurfaceKHR surface, device_infos_t* device_infos);
+static void fill_device_memory_properties(VkPhysicalDevice device, device_infos_t* device_infos);
 static bool is_device_suitable(const device_infos_t* infos, bool verify_present_capabilities);
 
 bool render_device_init(render_device_t* self, const render_context_t* render_context) {
@@ -61,14 +63,20 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
       .synchronization2 = VK_TRUE,
     };
 
+    VkPhysicalDeviceVulkan12Features vulkan_1_2_features = {
+      .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+      .pNext = &vulkan_1_3_features,
+      .uniformBufferStandardLayout = VK_TRUE,
+    };
+
     VkDeviceCreateInfo device_create_infos = {
       .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+      .pNext = &vulkan_1_2_features,
       .queueCreateInfoCount = 1,
       .pQueueCreateInfos = &graphics_queue_create_infos,
       .enabledExtensionCount = (uint32_t)required_extensions.element_count,
       .ppEnabledExtensionNames = required_extensions.data,
       .pEnabledFeatures = &vkPhysicalDeviceFeatures,
-      .pNext = &vulkan_1_3_features,
     };
 
     if (
@@ -80,8 +88,10 @@ bool render_device_init(render_device_t* self, const render_context_t* render_co
 
     vulkan_load_device_functions(self->vk_device);
 
-    self->physical_device = chosen_device_infos.vk_physical_device,
+    self->physical_device = chosen_device_infos.vk_physical_device;
+    self->limits = chosen_device_infos.limits;
     self->present_capabilities = chosen_device_infos.present_capabilities;
+    self->memory_properties = chosen_device_infos.memory_properties;
 
     self->graphics_queue_family_index = chosen_device_infos.graphics_queue_family_index;
     vkGetDeviceQueue(
@@ -150,18 +160,18 @@ static device_infos_t get_device_infos(
       .vk_physical_device = device,
     };
 
-    fill_device_vulkan_version_support(device, &infos);
+    fill_device_properties(device, &infos);
     fill_device_extension_support(device, required_extensions, &infos);
     fill_device_queues_support(device, surface, &infos);
     if (surface != VK_NULL_HANDLE) {
         fill_device_present_capabilities(device, surface, &infos);
     }
+    fill_device_memory_properties(device, &infos);
 
     return infos;
 }
 
-static void fill_device_vulkan_version_support(
-  VkPhysicalDevice device, device_infos_t* device_infos) {
+static void fill_device_properties(VkPhysicalDevice device, device_infos_t* device_infos) {
     VkPhysicalDeviceProperties device_properties;
     vkGetPhysicalDeviceProperties(device, &device_properties);
     if (
@@ -169,6 +179,8 @@ static void fill_device_vulkan_version_support(
       && VK_API_VERSION_MINOR(device_properties.apiVersion) >= 3) {
         device_infos->supports_minimum_vulkan_version = true;
     }
+
+    device_infos->limits = device_properties.limits;
 }
 
 static void fill_device_extension_support(
@@ -262,6 +274,10 @@ static void fill_device_present_capabilities(
       device, surface, &present_mode_count, present_capabilities.supported_present_modes.data);
 
     device_infos->present_capabilities = present_capabilities;
+}
+
+static void fill_device_memory_properties(VkPhysicalDevice device, device_infos_t* device_infos) {
+    vkGetPhysicalDeviceMemoryProperties(device, &device_infos->memory_properties);
 }
 
 static bool is_device_suitable(const device_infos_t* infos, bool verify_present_capabilities) {

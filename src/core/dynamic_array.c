@@ -52,6 +52,16 @@ void dynamic_array_free(dynamic_array_t* self) {
     self->allocated_bytes = 0;
 }
 
+dynamic_array_t dynamic_array_from(slice_t other) {
+    dynamic_array_t array = dynamic_array_allocate_size(other.element_size, other.element_count);
+
+    void* new_items_location = (char*)array.data;
+    size_t bytes_to_copy = other.element_count * other.element_size;
+    memcpy(new_items_location, other.first_element, bytes_to_copy);
+
+    return array;
+}
+
 void dynamic_array_push(dynamic_array_t* self, const void* element) {
     dynamic_array_push_multiple(self, element, 1);
 }
@@ -60,8 +70,7 @@ void dynamic_array_concat(dynamic_array_t* self, const dynamic_array_t* other) {
     dynamic_array_push_multiple(self, other->data, other->element_count);
 }
 
-void dynamic_array_push_multiple(
-  dynamic_array_t* self, const void* elements, size_t element_count) {
+size_t dynamic_array_extend(dynamic_array_t* self, size_t element_count) {
     const size_t new_required_bytes = element_count * self->element_size;
     const size_t currently_used_bytes = self->element_count * self->element_size;
     const size_t minimum_required_bytes = currently_used_bytes + new_required_bytes;
@@ -82,9 +91,18 @@ void dynamic_array_push_multiple(
         self->allocated_bytes = new_allocation_size;
     }
 
-    void* new_items_location = (char*)self->data + (self->element_count * self->element_size);
+    size_t new_elements_index = self->element_count;
+    self->element_count += element_count;
+
+    return new_elements_index;
+}
+
+void dynamic_array_push_multiple(
+  dynamic_array_t* self, const void* elements, size_t element_count) {
+
+    size_t new_elements_start_index = dynamic_array_extend(self, element_count);
+
+    void* new_items_location = (char*)self->data + (new_elements_start_index * self->element_size);
     size_t bytes_to_copy = element_count * self->element_size;
     memcpy(new_items_location, elements, bytes_to_copy);
-
-    self->element_count += element_count;
 }

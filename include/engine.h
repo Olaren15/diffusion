@@ -3,6 +3,9 @@
 
 #include "platform/window.h"
 #include "rendering/frame.h"
+#include "rendering/memory/gpu_allocated_buffer.h"
+#include "rendering/memory/rebar_gpu_allocator.h"
+#include "rendering/model/gpu_mesh.h"
 #include "rendering/render_context.h"
 #include "rendering/render_device.h"
 #include "rendering/swapchain.h"
@@ -16,10 +19,12 @@ typedef struct engine_s {
     window_t window;
     render_context_t render_context;
     render_device_t render_device;
+    rebar_gpu_allocator_t gpu_allocator;
     swapchain_t swapchain;
     uint32_t current_frame;
     frame_t frames[ENGINE_MAX_FRAMES_IN_FLIGHT];
     triangle_pipeline_t triangle_pipeline;
+    gpu_mesh_t triangle_mesh;
 } engine_t;
 
 /**

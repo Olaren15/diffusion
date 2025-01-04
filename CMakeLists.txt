@@ -23,6 +23,7 @@ add_library(
         src/core/dynamic_array.c
         src/core/file.c
         src/core/math.c
+        src/core/slice.c
 
         src/platform/win32/window.c
         src/platform/vulkan.c
@@ -30,6 +31,11 @@ add_library(
 
         src/rendering/frame.c
         src/rendering/frame_sync.c
+        src/rendering/memory/gpu_allocated_buffer.c
+        src/rendering/memory/gpu_allocation.c
+        src/rendering/memory/gpu_memory.c
+        src/rendering/memory/rebar_gpu_allocator.c
+        src/rendering/model/gpu_mesh.c
         src/rendering/render_context.c
         src/rendering/render_device.c
         src/rendering/swapchain.c
