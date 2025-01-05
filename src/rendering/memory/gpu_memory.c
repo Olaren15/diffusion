@@ -1,4 +1,4 @@
-﻿#include "rendering/memory/gpu_memory.h"
+﻿#include "rendering/memory/utils.h"
 
 VkDeviceSize get_next_offset_for_alignment(VkDeviceSize offset, VkDeviceSize alignment) {
     VkDeviceSize bytes_out_of_alignment = offset % alignment;

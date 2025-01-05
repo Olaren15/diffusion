@@ -192,20 +192,7 @@ static bool engine_iterate(engine_t* self) {
     vkCmdSetViewport(current_frame->command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(current_frame->command_buffer, 0, 1, &whole_frame_rect);
 
-    VkDeviceSize buffer_offset = 0;
-    vkCmdBindVertexBuffers(
-      current_frame->command_buffer,
-      0,
-      1,
-      &self->triangle_mesh.vertex_buffer.buffer,
-      &buffer_offset);
-    vkCmdBindIndexBuffer(
-      current_frame->command_buffer,
-      self->triangle_mesh.index_buffer.buffer,
-      0,
-      VK_INDEX_TYPE_UINT32);
-
-    vkCmdDrawIndexed(current_frame->command_buffer, self->triangle_mesh.index_count, 1, 0, 0, 0);
+    gpu_mesh_draw(&self->triangle_mesh, current_frame->command_buffer);
 
     vkCmdEndRendering(current_frame->command_buffer);
 

@@ -73,51 +73,48 @@ bool rebar_gpu_allocator_create_buffer(
         return false;
     }
 
-    gpu_sub_allocation_t sub_allocation;
-
-    bool found_suitable_allocation = false;
+    gpu_span_t memory_span;
+    gpu_allocation_t* allocation = NULL;
     for (size_t i = 0; i < self->allocations.element_count; i++) {
-        gpu_allocation_t* allocation = ((gpu_allocation_t*)self->allocations.data) + i;
+        gpu_allocation_t* potential_allocation = ((gpu_allocation_t*)self->allocations.data) + i;
 
         if (gpu_allocation_can_sub_allocate(
-              allocation, memory_requirements.size, memory_requirements.alignment)) {
+              potential_allocation, memory_requirements.size, memory_requirements.alignment)) {
 
-            found_suitable_allocation = true;
-            sub_allocation = gpu_allocation_sub_allocate(
-              allocation, memory_requirements.size, memory_requirements.alignment);
+            allocation = potential_allocation;
+            memory_span = gpu_allocation_sub_allocate(
+              potential_allocation, memory_requirements.size, memory_requirements.alignment);
         }
     }
 
-    if (!found_suitable_allocation) {
+    if (allocation == NULL) {
         VkDeviceSize allocation_size = memory_requirements.size > DEFAULT_ALLOCATION_SIZE
                                          ? memory_requirements.size
                                          : DEFAULT_ALLOCATION_SIZE;
 
         size_t new_allocation_index = dynamic_array_extend(&self->allocations, 1);
-        gpu_allocation_t* new_allocation = ((gpu_allocation_t*)self->allocations.data)
-                                           + new_allocation_index;
-        if (!gpu_allocation_create(
-              new_allocation, device, self->memory_type_index, allocation_size)) {
+        allocation = ((gpu_allocation_t*)self->allocations.data) + new_allocation_index;
+        if (!gpu_allocation_create(allocation, device, self->memory_type_index, allocation_size)) {
 
             vkDestroyBuffer(device->vk_device, vk_buffer, NULL);
             return false;
         }
 
-        sub_allocation = gpu_allocation_sub_allocate(
-          new_allocation, memory_requirements.size, memory_requirements.alignment);
+        memory_span = gpu_allocation_sub_allocate(
+          allocation, memory_requirements.size, memory_requirements.alignment);
     }
 
     if (
-      vkBindBufferMemory(
-        device->vk_device, vk_buffer, sub_allocation.main_allocation->memory, sub_allocation.offset)
+      vkBindBufferMemory(device->vk_device, vk_buffer, allocation->memory, memory_span.offset)
       != VK_SUCCESS) {
         vkDestroyBuffer(device->vk_device, vk_buffer, NULL);
         return false;
     }
 
     *buffer = (gpu_allocated_buffer_t){
-      .buffer = vk_buffer,
-      .sub_allocation = sub_allocation,
+      .vk_buffer = vk_buffer,
+      .span = memory_span,
+      .allocation = allocation,
     };
 
     return true;

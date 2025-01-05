@@ -1,6 +1,6 @@
 ﻿#include "rendering/render_context.h"
 
-#include "core/dynamic_array.h"
+#include "core/memory/dynamic_array.h"
 #include "platform/vulkan.h"
 #include "project.h"
 

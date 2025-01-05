@@ -1,6 +1,6 @@
-﻿#include "core/slice.h"
+﻿#include "core/memory/slice.h"
 
-#include "core/dynamic_array.h"
+#include "core/memory/dynamic_array.h"
 
 slice_t slice_from_dynamic_array(const dynamic_array_t* array) {
     slice_t slice = {

@@ -1,7 +1,7 @@
 ﻿#ifndef DIFFUSION_CORE_FILE_H
 #define DIFFUSION_CORE_FILE_H
 
-#include "core/dynamic_array.h"
+#include "core/memory/dynamic_array.h"
 
 /**
  * Read a whole file to a byte buffer

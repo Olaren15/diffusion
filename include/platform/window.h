@@ -1,7 +1,7 @@
 ﻿#ifndef DIFFUSION_PLATFORM_WINDOW_H
 #define DIFFUSION_PLATFORM_WINDOW_H
 
-#include "core/dynamic_array.h"
+#include "core/memory/dynamic_array.h"
 #include "event.h"
 
 #include <stdbool.h>

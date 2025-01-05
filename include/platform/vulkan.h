@@ -3,8 +3,6 @@
 
 #define VK_NO_PROTOTYPES
 
-#include "core/dynamic_array.h"
-
 #include <stdbool.h>
 #include <vulkan/vulkan.h>
 

@@ -1,7 +1,7 @@
-﻿#ifndef DIFFUSION_CORE_DYNAMIC_ARRAY_H
-#define DIFFUSION_CORE_DYNAMIC_ARRAY_H
+﻿#ifndef DIFFUSION_CORE_MEMORY_DYNAMIC_ARRAY_H
+#define DIFFUSION_CORE_MEMORY_DYNAMIC_ARRAY_H
 
-#include "core/slice.h"
+#include "core/memory/slice.h"
 
 #include <stdint.h>
 
@@ -57,4 +57,4 @@ size_t dynamic_array_extend(dynamic_array_t* self, size_t element_count);
 
 void dynamic_array_concat(dynamic_array_t* self, const dynamic_array_t* other);
 
-#endif // DIFFUSION_CORE_DYNAMIC_ARRAY_H
+#endif // DIFFUSION_CORE_MEMORY_DYNAMIC_ARRAY_H

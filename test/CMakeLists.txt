@@ -6,5 +6,5 @@
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 
-add_test_case(core.dynamic_array_tests src/core/dynamic_array_tests.c)
+add_test_case(core.dynamic_array_tests src/core/memory/dynamic_array_tests.c)
 add_test_case(core.math_tests src/core/math_tests.c)

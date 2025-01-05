@@ -2,7 +2,7 @@
 #define DIFFUSION_RENDERING_MEMORY_GPU_ALLOCATION_H
 
 #include "platform/vulkan.h"
-#include "rendering/memory/gpu_sub_allocation.h"
+#include "rendering/memory/gpu_span.h"
 #include "rendering/render_device.h"
 
 typedef struct gpu_allocation_s {
@@ -10,6 +10,7 @@ typedef struct gpu_allocation_s {
     VkDeviceSize allocated_size;
     VkDeviceSize current_offset;
     VkDeviceSize flush_size;
+    void* mapped;
 } gpu_allocation_t;
 
 bool gpu_allocation_create(
@@ -23,7 +24,7 @@ void gpu_allocation_destroy(gpu_allocation_t* self, const render_device_t* devic
 bool gpu_allocation_can_sub_allocate(
   const gpu_allocation_t* self, VkDeviceSize size, VkDeviceSize alignment);
 
-gpu_sub_allocation_t gpu_allocation_sub_allocate(
+gpu_span_t gpu_allocation_sub_allocate(
   gpu_allocation_t* self, VkDeviceSize size, VkDeviceSize alignment);
 
 #endif // DIFFUSION_RENDERING_MEMORY_GPU_ALLOCATION_H

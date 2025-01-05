@@ -1,5 +1,5 @@
-﻿#ifndef DIFFUSION_CORE_SLICE_H
-#define DIFFUSION_CORE_SLICE_H
+﻿#ifndef DIFFUSION_CORE_MEMORY_SLICE_H
+#define DIFFUSION_CORE_MEMORY_SLICE_H
 
 #include "stdint.h"
 
@@ -13,4 +13,4 @@ typedef struct slice_s {
 
 slice_t slice_from_dynamic_array(const struct dynamic_array_s* array);
 
-#endif // DIFFUSION_CORE_SLICE_H
+#endif // DIFFUSION_CORE_MEMORY_SLICE_H

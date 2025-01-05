@@ -2,7 +2,7 @@
 #define DIFFUSION_RENDERING_MODEL_MESH_H
 
 #include "rendering/model/vertex.h"
-#include "core/dynamic_array.h"
+#include "core/memory/dynamic_array.h"
 
 typedef struct mesh_s {
     dynamic_array_t vertices; // vertex_t

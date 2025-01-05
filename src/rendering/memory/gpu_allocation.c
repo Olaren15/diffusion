@@ -1,6 +1,6 @@
 ﻿#include "rendering/memory/gpu_allocation.h"
 
-#include "rendering/memory/gpu_memory.h"
+#include "rendering/memory/utils.h"
 
 bool gpu_allocation_create(
   gpu_allocation_t* self,
@@ -20,6 +20,12 @@ bool gpu_allocation_create(
         return false;
     }
 
+    if (
+      vkMapMemory(device->vk_device, self->memory, 0, VK_WHOLE_SIZE, 0, &self->mapped)
+      != VK_SUCCESS) {
+        return false;
+    }
+
     self->allocated_size = size;
     self->current_offset = 0;
     self->flush_size = device->limits.nonCoherentAtomSize;
@@ -28,6 +34,10 @@ bool gpu_allocation_create(
 }
 
 void gpu_allocation_destroy(gpu_allocation_t* self, const render_device_t* device) {
+    if (self->mapped != NULL) {
+        vkUnmapMemory(device->vk_device, self->memory);
+    }
+
     vkFreeMemory(device->vk_device, self->memory, NULL);
 }
 
@@ -38,12 +48,11 @@ bool gpu_allocation_can_sub_allocate(
     return next_offset + size <= self->allocated_size;
 }
 
-gpu_sub_allocation_t gpu_allocation_sub_allocate(
+gpu_span_t gpu_allocation_sub_allocate(
   gpu_allocation_t* self, VkDeviceSize size, VkDeviceSize alignment) {
 
     VkDeviceSize new_offset = get_next_offset_for_alignment(self->current_offset, alignment);
-    gpu_sub_allocation_t sub_allocation = {
-      .main_allocation = self,
+    gpu_span_t sub_allocation = {
       .offset = new_offset,
       .size = size,
     };

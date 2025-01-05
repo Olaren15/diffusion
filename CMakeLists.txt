@@ -20,10 +20,11 @@ add_library(
         ${CMAKE_BINARY_DIR}/generated/src/project.c
         src/engine.c
 
-        src/core/dynamic_array.c
         src/core/file.c
         src/core/math.c
-        src/core/slice.c
+        src/core/memory/dynamic_array.c
+        src/core/memory/slice.c
+        src/core/memory/span.c
 
         src/platform/win32/window.c
         src/platform/vulkan.c
