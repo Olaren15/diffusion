@@ -8,3 +8,4 @@ endfunction()
 
 add_test_case(core.dynamic_array_tests src/core/memory/dynamic_array_tests.c)
 add_test_case(core.math_tests src/core/math_tests.c)
+add_test_case(core.math.matrix_4x4_tests src/core/math/matrix4x4_tests.c)
