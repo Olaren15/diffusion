@@ -59,7 +59,7 @@ bool engine_init(engine_t* self) {
 
     self->current_frame = 0;
     for (size_t i = 0; i < ENGINE_MAX_FRAMES_IN_FLIGHT; i++) {
-        frame_init(self->frames + i, &self->render_device);
+        frame_init(self->frames + i, &self->render_device, &self->gpu_allocator);
     }
 
     if (!triangle_pipeline_create(
@@ -97,7 +97,7 @@ void engine_destroy(engine_t* self) {
     triangle_pipeline_destroy(&self->triangle_pipeline, &self->render_device);
 
     for (size_t i = 0; i < ENGINE_MAX_FRAMES_IN_FLIGHT; i++) {
-        frame_destroy(self->frames + i, &self->render_device);
+        frame_destroy(self->frames + i, &self->render_device, &self->gpu_allocator);
     }
 
     swapchain_destroy(&self->swapchain, &self->render_device);
@@ -145,6 +145,18 @@ static bool engine_iterate(engine_t* self) {
     if (!frame_begin_new(current_frame, &self->render_device)) {
         return false;
     }
+
+    vector_3f_position_t camera_position = {.x = 0.2f, .y = 0.3f, .z = 0.0f};
+    matrix_4x4f_t view = matrix_4x4f_translate(matrix_4x4f_identity, camera_position);
+    matrix_4x4f_t projection = matrix_4x4f_identity; // TODO
+    camera_data_t camera_data = {
+      .view = view,
+      .projection = projection,
+      .view_projection = matrix_4x4f_multiply(view, projection),
+    };
+     if (!frame_update_gpu_data(current_frame, &self->render_device, &camera_data)) {
+         return false;
+     }
 
     swapchain_prepare_current_image_for_writing(&self->swapchain, current_frame->command_buffer);
 

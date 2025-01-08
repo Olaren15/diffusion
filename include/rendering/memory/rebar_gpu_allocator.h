@@ -38,4 +38,7 @@ bool rebar_gpu_allocator_create_buffer(
   const VkBufferCreateInfo* buffer_create_info,
   gpu_allocated_buffer_t* buffer);
 
+bool rebar_gpu_allocator_free_buffer(
+  rebar_gpu_allocator_t* self, const render_device_t* device, gpu_allocated_buffer_t* buffer);
+
 #endif // DIFFUSION_RENDERING_MEMORY_H

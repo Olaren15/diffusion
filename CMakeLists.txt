@@ -31,8 +31,9 @@ add_library(
         src/platform/vulkan.c
         src/platform/win32/win32_utils.c
 
-        src/rendering/frame.c
-        src/rendering/frame_sync.c
+        src/rendering/frame/frame.c
+        src/rendering/frame/frame_gpu_data.c
+        src/rendering/frame/frame_sync.c
         src/rendering/memory/gpu_allocated_buffer.c
         src/rendering/memory/gpu_allocation.c
         src/rendering/memory/gpu_memory.c

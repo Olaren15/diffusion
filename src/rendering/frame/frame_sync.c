@@ -1,4 +1,4 @@
-﻿#include "rendering/frame_sync.h"
+﻿#include "rendering/frame/frame_sync.h"
 
 bool frame_sync_init(frame_sync_t* self, const render_device_t* device) {
     VkFenceCreateInfo fence_create_info = {

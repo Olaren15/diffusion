@@ -119,3 +119,9 @@ bool rebar_gpu_allocator_create_buffer(
 
     return true;
 }
+
+bool rebar_gpu_allocator_free_buffer(
+  rebar_gpu_allocator_t* self, const render_device_t* device, gpu_allocated_buffer_t* buffer) {
+    vkDestroyBuffer(device->vk_device, buffer->vk_buffer, NULL);
+    return true;
+}

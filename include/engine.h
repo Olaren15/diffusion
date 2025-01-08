@@ -2,7 +2,7 @@
 #define DIFFUSION_ENGINE_H
 
 #include "platform/window.h"
-#include "rendering/frame.h"
+#include "rendering/frame/frame.h"
 #include "rendering/memory/gpu_allocated_buffer.h"
 #include "rendering/memory/rebar_gpu_allocator.h"
 #include "rendering/model/gpu_mesh.h"

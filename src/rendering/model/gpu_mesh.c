@@ -48,14 +48,14 @@ bool gpu_mesh_create(
 
 void gpu_mesh_destroy(
   gpu_mesh_t* self, const render_device_t* device, rebar_gpu_allocator_t* allocator) {
-    vkDestroyBuffer(device->vk_device, self->buffer.vk_buffer, NULL);
+    rebar_gpu_allocator_free_buffer(allocator, device, &self->buffer);
 }
 
 void gpu_mesh_draw(const gpu_mesh_t* self, VkCommandBuffer command_buffer) {
-    vkCmdBindVertexBuffers(
-      command_buffer, 0, 1, &self->buffer.vk_buffer, &self->vertices_span.offset);
     vkCmdBindIndexBuffer(
       command_buffer, self->buffer.vk_buffer, self->indices_span.offset, VK_INDEX_TYPE_UINT32);
+    vkCmdBindVertexBuffers(
+      command_buffer, 0, 1, &self->buffer.vk_buffer, &self->vertices_span.offset);
 
     vkCmdDrawIndexed(command_buffer, self->index_count, 1, 0, 0, 0);
 }

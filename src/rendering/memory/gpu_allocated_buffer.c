@@ -14,7 +14,7 @@ bool gpu_allocated_buffer_copy_data(
         return false;
     }
 
-    memcpy((char*)self->allocation->mapped + offset, source.start, source.size);
+    memcpy((char*)self->allocation->mapped + self->span.offset + offset, source.start, source.size);
 
     VkMappedMemoryRange mapp_memory_range = {
       .sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,

@@ -1,6 +1,6 @@
-﻿#include "rendering/frame.h"
+﻿#include "rendering/frame/frame.h"
 
-bool frame_init(frame_t* self, const render_device_t* device) {
+bool frame_init(frame_t* self, const render_device_t* device, rebar_gpu_allocator_t* allocator) {
     VkCommandPoolCreateInfo command_pool_create_info = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
       .queueFamilyIndex = device->graphics_queue_family_index,
@@ -26,12 +26,19 @@ bool frame_init(frame_t* self, const render_device_t* device) {
         return false;
     }
 
-    frame_sync_init(&self->sync, device);
+    if (!frame_sync_init(&self->sync, device)) {
+        return false;
+    }
+
+    if (!frame_gpu_data_init(&self->gpu_data, device, allocator)) {
+        return false;
+    }
 
     return true;
 }
 
-void frame_destroy(frame_t* self, const render_device_t* device) {
+void frame_destroy(frame_t* self, const render_device_t* device, rebar_gpu_allocator_t* allocator) {
+    frame_gpu_data_destroy(&self->gpu_data, device, allocator);
     frame_sync_destroy(&self->sync, device);
     vkDestroyCommandPool(device->vk_device, self->command_pool, NULL);
 }
@@ -105,6 +112,17 @@ bool frame_end(frame_t* self, const render_device_t* device) {
     if (
       vkQueueSubmit2(device->graphics_queue, 1, &submit_info, self->sync.render_completed_fence)
       != VK_SUCCESS) {
+        return false;
+    }
+
+    return true;
+}
+
+bool frame_update_gpu_data(
+  frame_t* self, const render_device_t* device, const camera_data_t* camera_data) {
+    self->gpu_data.camera_data = *camera_data;
+
+    if (!frame_gpu_data_upload_to_gpu(&self->gpu_data, device)) {
         return false;
     }
 

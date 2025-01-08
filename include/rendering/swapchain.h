@@ -2,7 +2,7 @@
 #define DIFFUSION_RENDERING_SWAPCHAIN_H
 
 #include "platform/vulkan.h"
-#include "rendering/frame.h"
+#include "rendering/frame/frame.h"
 #include "rendering/render_context.h"
 #include "rendering/render_device.h"
 
