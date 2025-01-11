@@ -12,7 +12,11 @@ typedef struct triangle_pipeline_s {
 /**
  * Create a pipeline that renders a triangle
  */
-bool triangle_pipeline_create(triangle_pipeline_t* self, const render_device_t* device, VkFormat color_attachment_format);
+bool triangle_pipeline_create(
+  triangle_pipeline_t* self,
+  const render_device_t* device,
+  VkFormat color_attachment_format,
+  VkDescriptorSetLayout scene_descriptor_set_layout);
 
 /**
  * Destroy the triangle pipeline

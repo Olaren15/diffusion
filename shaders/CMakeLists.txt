@@ -19,7 +19,7 @@ foreach (SHADER_SOURCE IN LISTS SHADER_SOURCES)
     add_custom_command(
             OUTPUT ${SHADER_OUTPUT_FILE}
             DEPENDS ${SHADER_SOURCE}
-            COMMAND ${SLANGC_EXECUTABLE} ${SHADER_SOURCE} -target spirv -fvk-use-entrypoint-name -o ${SHADER_OUTPUT_FILE}
+            COMMAND ${SLANGC_EXECUTABLE} ${SHADER_SOURCE} -target spirv -fvk-use-entrypoint-name -matrix-layout-row-major -o ${SHADER_OUTPUT_FILE}
             COMMENT "Compiling shader ${SHADER_SOURCE}"
     )
 

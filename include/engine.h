@@ -23,6 +23,8 @@ typedef struct engine_s {
     swapchain_t swapchain;
     uint32_t current_frame;
     frame_t frames[ENGINE_MAX_FRAMES_IN_FLIGHT];
+    VkDescriptorSetLayout scene_descriptor_set_layout;
+    VkDescriptorPool descriptor_pool;
     triangle_pipeline_t triangle_pipeline;
     gpu_mesh_t triangle_mesh;
 } engine_t;

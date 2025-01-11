@@ -1,6 +1,11 @@
 ﻿#include "rendering/frame/frame.h"
 
-bool frame_init(frame_t* self, const render_device_t* device, rebar_gpu_allocator_t* allocator) {
+bool frame_init(
+  frame_t* self,
+  const render_device_t* device,
+  rebar_gpu_allocator_t* allocator,
+  VkDescriptorSetLayout scene_descriptor_set_layout,
+  VkDescriptorPool descriptor_pool) {
     VkCommandPoolCreateInfo command_pool_create_info = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
       .queueFamilyIndex = device->graphics_queue_family_index,
@@ -30,7 +35,8 @@ bool frame_init(frame_t* self, const render_device_t* device, rebar_gpu_allocato
         return false;
     }
 
-    if (!frame_gpu_data_init(&self->gpu_data, device, allocator)) {
+    if (!frame_gpu_data_init(
+          &self->gpu_data, device, allocator, scene_descriptor_set_layout, descriptor_pool)) {
         return false;
     }
 
@@ -119,8 +125,8 @@ bool frame_end(frame_t* self, const render_device_t* device) {
 }
 
 bool frame_update_gpu_data(
-  frame_t* self, const render_device_t* device, const camera_data_t* camera_data) {
-    self->gpu_data.camera_data = *camera_data;
+  frame_t* self, const render_device_t* device, const scene_data_t* scene_data) {
+    self->gpu_data.scene_data = *scene_data;
 
     if (!frame_gpu_data_upload_to_gpu(&self->gpu_data, device)) {
         return false;

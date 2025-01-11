@@ -111,12 +111,20 @@ extern PFN_vkCmdSetViewport vkCmdSetViewport;
 extern PFN_vkCmdSetScissor vkCmdSetScissor;
 extern PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers;
 extern PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer;
+extern PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets;
 extern PFN_vkCmdDraw vkCmdDraw;
 extern PFN_vkCmdDrawIndexed vkCmdDrawIndexed;
 
 extern PFN_vkGetDeviceQueue vkGetDeviceQueue;
 extern PFN_vkQueueSubmit2 vkQueueSubmit2;
 extern PFN_vkQueuePresentKHR vkQueuePresentKHR;
+
+extern PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+extern PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+extern PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
+extern PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
+extern PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+extern PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
 
 extern PFN_vkCreateShaderModule vkCreateShaderModule;
 extern PFN_vkDestroyShaderModule vkDestroyShaderModule;

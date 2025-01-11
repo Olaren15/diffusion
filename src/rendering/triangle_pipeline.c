@@ -7,7 +7,25 @@ bool create_shader_module(
   const char* shader_path, const render_device_t* device, VkShaderModule* shader_module);
 
 bool triangle_pipeline_create(
-  triangle_pipeline_t* self, const render_device_t* device, VkFormat color_attachment_format) {
+  triangle_pipeline_t* self,
+  const render_device_t* device,
+  VkFormat color_attachment_format,
+  VkDescriptorSetLayout scene_descriptor_set_layout) {
+
+    VkPipelineLayoutCreateInfo pipeline_layout_create_infos = {
+      .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+      .setLayoutCount = 1,
+      .pSetLayouts = &scene_descriptor_set_layout,
+      .pushConstantRangeCount = 0,
+      .pPushConstantRanges = NULL,
+    };
+
+    if (
+      vkCreatePipelineLayout(device->vk_device, &pipeline_layout_create_infos, NULL, &self->layout)
+      != VK_SUCCESS) {
+        return false;
+    }
+
     VkShaderModule triangle_shader;
     if (!create_shader_module("shaders/triangle.spv", device, &triangle_shader)) {
         return false;
@@ -117,20 +135,6 @@ bool triangle_pipeline_create(
       .colorAttachmentCount = 1,
       .pColorAttachmentFormats = &color_attachment_format,
     };
-
-    VkPipelineLayoutCreateInfo pipeline_layout_create_infos = {
-      .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-      .setLayoutCount = 0,
-      .pSetLayouts = NULL,
-      .pushConstantRangeCount = 0,
-      .pPushConstantRanges = NULL,
-    };
-
-    if (
-      vkCreatePipelineLayout(device->vk_device, &pipeline_layout_create_infos, NULL, &self->layout)
-      != VK_SUCCESS) {
-        return false;
-    }
 
     VkGraphicsPipelineCreateInfo pipeline_create_info = {
       .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,

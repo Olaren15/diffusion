@@ -20,7 +20,12 @@ typedef struct frame_s {
  *
  * @returns true on success or false on failure
  */
-bool frame_init(frame_t* self, const render_device_t* device, rebar_gpu_allocator_t* allocator);
+bool frame_init(
+  frame_t* self,
+  const render_device_t* device,
+  rebar_gpu_allocator_t* allocator,
+  VkDescriptorSetLayout scene_descriptor_set_layout,
+  VkDescriptorPool descriptor_pool);
 
 /**
  * Destroy a frame data
@@ -46,6 +51,7 @@ bool frame_end(frame_t* self, const render_device_t* device);
 /**
  * Updates the gpu data for this frame
  */
-bool frame_update_gpu_data(frame_t* self, const render_device_t* device, const camera_data_t* camera_data);
+bool frame_update_gpu_data(
+  frame_t* self, const render_device_t* device, const scene_data_t* scene_data);
 
 #endif // DIFFUSION_RENDERING_FRAME_DATA_H

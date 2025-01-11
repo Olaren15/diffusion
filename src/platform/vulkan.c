@@ -128,12 +128,27 @@ void vulkan_load_device_functions(VkDevice device) {
       device, "vkCmdBindVertexBuffers");
     vkCmdBindIndexBuffer = (PFN_vkCmdBindIndexBuffer)vkGetDeviceProcAddr(
       device, "vkCmdBindIndexBuffer");
+    vkCmdBindDescriptorSets = (PFN_vkCmdBindDescriptorSets)vkGetDeviceProcAddr(
+      device, "vkCmdBindDescriptorSets");
     vkCmdDraw = (PFN_vkCmdDraw)vkGetDeviceProcAddr(device, "vkCmdDraw");
     vkCmdDrawIndexed = (PFN_vkCmdDrawIndexed)vkGetDeviceProcAddr(device, "vkCmdDrawIndexed");
 
     vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
     vkQueueSubmit2 = (PFN_vkQueueSubmit2)vkGetDeviceProcAddr(device, "vkQueueSubmit2");
     vkQueuePresentKHR = (PFN_vkQueuePresentKHR)vkGetDeviceProcAddr(device, "vkQueuePresentKHR");
+
+    vkCreateDescriptorSetLayout = (PFN_vkCreateDescriptorSetLayout)vkGetDeviceProcAddr(
+      device, "vkCreateDescriptorSetLayout");
+    vkDestroyDescriptorSetLayout = (PFN_vkDestroyDescriptorSetLayout)vkGetDeviceProcAddr(
+      device, "vkDestroyDescriptorSetLayout");
+    vkCreateDescriptorPool = (PFN_vkCreateDescriptorPool)vkGetDeviceProcAddr(
+      device, "vkCreateDescriptorPool");
+    vkDestroyDescriptorPool = (PFN_vkDestroyDescriptorPool)vkGetDeviceProcAddr(
+      device, "vkDestroyDescriptorPool");
+    vkAllocateDescriptorSets = (PFN_vkAllocateDescriptorSets)vkGetDeviceProcAddr(
+      device, "vkAllocateDescriptorSets");
+    vkUpdateDescriptorSets = (PFN_vkUpdateDescriptorSets)vkGetDeviceProcAddr(
+      device, "vkUpdateDescriptorSets");
 
     vkCreateShaderModule = (PFN_vkCreateShaderModule)vkGetDeviceProcAddr(
       device, "vkCreateShaderModule");
@@ -227,12 +242,20 @@ void vulkan_release_device_functions(void) {
     vkCmdSetScissor = NULL;
     vkCmdBindVertexBuffers = NULL;
     vkCmdBindIndexBuffer = NULL;
+    vkCmdBindDescriptorSets = NULL;
     vkCmdDraw = NULL;
     vkCmdDrawIndexed = NULL;
 
     vkGetDeviceQueue = NULL;
     vkQueueSubmit2 = NULL;
     vkQueuePresentKHR = NULL;
+
+    vkCreateDescriptorSetLayout = NULL;
+    vkDestroyDescriptorSetLayout = NULL;
+    vkCreateDescriptorPool = NULL;
+    vkDestroyDescriptorPool = NULL;
+    vkAllocateDescriptorSets = NULL;
+    vkUpdateDescriptorSets = NULL;
 
     vkCreateShaderModule = NULL;
     vkDestroyShaderModule = NULL;
@@ -315,12 +338,20 @@ PFN_vkCmdSetViewport vkCmdSetViewport = NULL;
 PFN_vkCmdSetScissor vkCmdSetScissor = NULL;
 PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = NULL;
 PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer = NULL;
+PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets = NULL;
 PFN_vkCmdDraw vkCmdDraw = NULL;
 PFN_vkCmdDrawIndexed vkCmdDrawIndexed = NULL;
 
 PFN_vkGetDeviceQueue vkGetDeviceQueue = NULL;
 PFN_vkQueueSubmit2 vkQueueSubmit2 = NULL;
 PFN_vkQueuePresentKHR vkQueuePresentKHR = NULL;
+
+PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout = NULL;
+PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout = NULL;
+PFN_vkCreateDescriptorPool vkCreateDescriptorPool = NULL;
+PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool = NULL;
+PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets = NULL;
+PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets = NULL;
 
 PFN_vkCreateShaderModule vkCreateShaderModule = NULL;
 PFN_vkDestroyShaderModule vkDestroyShaderModule = NULL;

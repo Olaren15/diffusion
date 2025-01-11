@@ -57,13 +57,62 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
+    VkDescriptorSetLayoutBinding scene_data_binding = {
+      .binding = 0,
+      .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      .descriptorCount = 1,
+      .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+    };
+
+    VkDescriptorSetLayoutCreateInfo layout_create_info = {
+      .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+      .bindingCount = 1,
+      .pBindings = &scene_data_binding,
+    };
+
+    if (
+      vkCreateDescriptorSetLayout(
+        self->render_device.vk_device,
+        &layout_create_info,
+        NULL,
+        &self->scene_descriptor_set_layout)
+      != VK_SUCCESS) {
+        return false;
+    }
+
+    VkDescriptorPoolSize descriptor_pool_sizes[1] = {
+      {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1}
+    };
+
+    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
+      .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+      .maxSets = ENGINE_MAX_FRAMES_IN_FLIGHT,
+      .poolSizeCount = 1,
+      .pPoolSizes = descriptor_pool_sizes,
+    };
+
+    if (
+      vkCreateDescriptorPool(
+        self->render_device.vk_device, &descriptor_pool_create_info, NULL, &self->descriptor_pool)
+      != VK_SUCCESS) {
+        return false;
+    }
+
     self->current_frame = 0;
     for (size_t i = 0; i < ENGINE_MAX_FRAMES_IN_FLIGHT; i++) {
-        frame_init(self->frames + i, &self->render_device, &self->gpu_allocator);
+        frame_init(
+          self->frames + i,
+          &self->render_device,
+          &self->gpu_allocator,
+          self->scene_descriptor_set_layout,
+          self->descriptor_pool);
     }
 
     if (!triangle_pipeline_create(
-          &self->triangle_pipeline, &self->render_device, self->swapchain.surface_format.format)) {
+          &self->triangle_pipeline,
+          &self->render_device,
+          self->swapchain.surface_format.format,
+          self->scene_descriptor_set_layout)) {
         return false;
     }
 
@@ -95,6 +144,10 @@ void engine_destroy(engine_t* self) {
     gpu_mesh_destroy(&self->triangle_mesh, &self->render_device, &self->gpu_allocator);
 
     triangle_pipeline_destroy(&self->triangle_pipeline, &self->render_device);
+
+    vkDestroyDescriptorPool(self->render_device.vk_device, self->descriptor_pool, NULL);
+    vkDestroyDescriptorSetLayout(
+      self->render_device.vk_device, self->scene_descriptor_set_layout, NULL);
 
     for (size_t i = 0; i < ENGINE_MAX_FRAMES_IN_FLIGHT; i++) {
         frame_destroy(self->frames + i, &self->render_device, &self->gpu_allocator);
@@ -149,14 +202,24 @@ static bool engine_iterate(engine_t* self) {
     vector_3f_position_t camera_position = {.x = 0.2f, .y = 0.3f, .z = 0.0f};
     matrix_4x4f_t view = matrix_4x4f_translate(matrix_4x4f_identity, camera_position);
     matrix_4x4f_t projection = matrix_4x4f_identity; // TODO
-    camera_data_t camera_data = {
+    scene_data_t scene_data = {
       .view = view,
       .projection = projection,
       .view_projection = matrix_4x4f_multiply(view, projection),
     };
-     if (!frame_update_gpu_data(current_frame, &self->render_device, &camera_data)) {
-         return false;
-     }
+    if (!frame_update_gpu_data(current_frame, &self->render_device, &scene_data)) {
+        return false;
+    }
+
+    vkCmdBindDescriptorSets(
+      current_frame->command_buffer,
+      VK_PIPELINE_BIND_POINT_GRAPHICS,
+      self->triangle_pipeline.layout,
+      0,
+      1,
+      &current_frame->gpu_data.descriptor_set,
+      0,
+      NULL);
 
     swapchain_prepare_current_image_for_writing(&self->swapchain, current_frame->command_buffer);
 
