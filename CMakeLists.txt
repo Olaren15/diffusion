@@ -26,6 +26,7 @@ add_library(
         src/core/memory/dynamic_array.c
         src/core/memory/slice.c
         src/core/memory/span.c
+        src/core/time.c
 
         src/platform/win32/window.c
         src/platform/vulkan.c

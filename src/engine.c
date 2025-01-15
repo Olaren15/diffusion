@@ -1,5 +1,7 @@
 ﻿#include "engine.h"
 
+#include "core/time.h"
+#include "math.h"
 #include "project.h"
 #include "rendering/model/mesh.h"
 #include "rendering/vk_utils.h"
@@ -33,6 +35,8 @@ const uint32_t TRIANGLE_INDICES[] = {0, 1, 2};
 static bool engine_iterate(engine_t* self);
 
 bool engine_init(engine_t* self) {
+    self->last_timestamp_nanoseconds = get_elapsed_nanoseconds();
+
     if (!window_create(PROJECT_NAME, DEFAULT_WIDTH, DEFAULT_HEIGHT, &self->window)) {
         return false;
     }
@@ -176,6 +180,8 @@ void engine_run(engine_t* self) {
 }
 
 static bool engine_iterate(engine_t* self) {
+    uint64_t current_timestamp_nanoseconds = get_elapsed_nanoseconds();
+
     self->current_frame = (self->current_frame + 1) % ENGINE_MAX_FRAMES_IN_FLIGHT;
     frame_t* current_frame = self->frames + self->current_frame;
 
@@ -199,7 +205,9 @@ static bool engine_iterate(engine_t* self) {
         return false;
     }
 
-    vector_3f_position_t camera_position = {.x = 0.2f, .y = 0.3f, .z = 0.0f};
+    double current_timestamp_seconds = nanoseconds_to_seconds(current_timestamp_nanoseconds);
+    vector_3f_position_t camera_position = {
+      .x = (float)sin(current_timestamp_seconds), .y = 0.0f, .z = 0.0f};
     matrix_4x4f_t view = matrix_4x4f_translate(matrix_4x4f_identity, camera_position);
     matrix_4x4f_t projection = matrix_4x4f_identity; // TODO
     scene_data_t scene_data = {
@@ -287,5 +295,6 @@ static bool engine_iterate(engine_t* self) {
         swapchain_recreate(&self->swapchain, &self->render_context, &self->render_device);
     }
 
+    self->last_timestamp_nanoseconds = current_timestamp_nanoseconds;
     return true;
 }

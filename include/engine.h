@@ -16,6 +16,7 @@
 #define ENGINE_MAX_FRAMES_IN_FLIGHT 2
 
 typedef struct engine_s {
+    uint64_t last_timestamp_nanoseconds;
     window_t window;
     render_context_t render_context;
     render_device_t render_device;
