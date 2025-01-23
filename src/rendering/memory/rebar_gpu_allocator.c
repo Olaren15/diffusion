@@ -1,5 +1,7 @@
 ﻿#include "rendering/memory/rebar_gpu_allocator.h"
 
+#include "core/memory/dynamic_array_element_reference.h"
+
 const VkDeviceSize DEFAULT_ALLOCATION_SIZE = 256 * 1024 * 1024; // 256 Mib
 
 static bool find_rebar_memory_type(const render_device_t* device, uint32_t* memory_type_index);
@@ -74,26 +76,27 @@ bool rebar_gpu_allocator_create_buffer(
     }
 
     gpu_span_t memory_span;
-    gpu_allocation_t* allocation = NULL;
+    size_t allocation_index = -1;
     for (size_t i = 0; i < self->allocations.element_count; i++) {
         gpu_allocation_t* potential_allocation = ((gpu_allocation_t*)self->allocations.data) + i;
 
         if (gpu_allocation_can_sub_allocate(
               potential_allocation, memory_requirements.size, memory_requirements.alignment)) {
 
-            allocation = potential_allocation;
+            allocation_index = i;
             memory_span = gpu_allocation_sub_allocate(
               potential_allocation, memory_requirements.size, memory_requirements.alignment);
         }
     }
 
-    if (allocation == NULL) {
+    if (allocation_index == -1) {
         VkDeviceSize allocation_size = memory_requirements.size > DEFAULT_ALLOCATION_SIZE
                                          ? memory_requirements.size
                                          : DEFAULT_ALLOCATION_SIZE;
 
-        size_t new_allocation_index = dynamic_array_extend(&self->allocations, 1);
-        allocation = ((gpu_allocation_t*)self->allocations.data) + new_allocation_index;
+        allocation_index = dynamic_array_extend(&self->allocations, 1);
+        gpu_allocation_t* allocation = ((gpu_allocation_t*)self->allocations.data)
+                                       + allocation_index;
         if (!gpu_allocation_create(allocation, device, self->memory_type_index, allocation_size)) {
 
             vkDestroyBuffer(device->vk_device, vk_buffer, NULL);
@@ -104,8 +107,17 @@ bool rebar_gpu_allocator_create_buffer(
           allocation, memory_requirements.size, memory_requirements.alignment);
     }
 
+    dynamic_array_element_reference_t allocation_reference = {
+      .array = &self->allocations,
+      .index = allocation_index,
+    };
+
     if (
-      vkBindBufferMemory(device->vk_device, vk_buffer, allocation->memory, memory_span.offset)
+      vkBindBufferMemory(
+        device->vk_device,
+        vk_buffer,
+        ((gpu_allocation_t*)follow_dynamic_array_reference(allocation_reference))->memory,
+        memory_span.offset)
       != VK_SUCCESS) {
         vkDestroyBuffer(device->vk_device, vk_buffer, NULL);
         return false;
@@ -114,7 +126,7 @@ bool rebar_gpu_allocator_create_buffer(
     *buffer = (gpu_allocated_buffer_t){
       .vk_buffer = vk_buffer,
       .span = memory_span,
-      .allocation = allocation,
+      .allocation_reference = allocation_reference,
     };
 
     return true;

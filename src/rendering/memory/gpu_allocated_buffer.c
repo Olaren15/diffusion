@@ -10,17 +10,20 @@ bool gpu_allocated_buffer_copy_data(
         return false;
     }
 
-    if (self->allocation->mapped == NULL) {
+    gpu_allocation_t* gpu_allocation = ((gpu_allocation_t*)follow_dynamic_array_reference(
+      self->allocation_reference));
+
+    if (gpu_allocation->mapped == NULL) {
         return false;
     }
 
-    memcpy((char*)self->allocation->mapped + self->span.offset + offset, source.start, source.size);
+    memcpy((char*)gpu_allocation->mapped + self->span.offset + offset, source.start, source.size);
 
     VkMappedMemoryRange mapp_memory_range = {
       .sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-      .memory = self->allocation->memory,
-      .offset = get_previous_offset_for_alignment(offset, self->allocation->flush_size),
-      .size = get_next_offset_for_alignment(source.size, self->allocation->flush_size),
+      .memory = gpu_allocation->memory,
+      .offset = get_previous_offset_for_alignment(offset, gpu_allocation->flush_size),
+      .size = get_next_offset_for_alignment(source.size, gpu_allocation->flush_size),
     };
 
     if (vkFlushMappedMemoryRanges(device->vk_device, 1, &mapp_memory_range) != VK_SUCCESS) {
