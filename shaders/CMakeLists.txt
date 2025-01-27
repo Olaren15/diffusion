@@ -16,10 +16,24 @@ foreach (SHADER_SOURCE IN LISTS SHADER_SOURCES)
     cmake_path(APPEND SHADER_OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR} ${SHADER_NAME})
     cmake_path(REPLACE_EXTENSION SHADER_OUTPUT_FILE "spv")
 
+    list(APPEND COMPILE_COMMAND ${SLANGC_EXECUTABLE})
+    list(APPEND COMPILE_COMMAND ${SHADER_SOURCE})
+    list(APPEND COMPILE_COMMAND "-target")
+    list(APPEND COMPILE_COMMAND "spirv")
+    list(APPEND COMPILE_COMMAND "-fvk-use-entrypoint-name")
+    list(APPEND COMPILE_COMMAND "-matrix-layout-row-major")
+    if (SHADER_DEBUG_INFO)
+        list(APPEND COMPILE_COMMAND "-g")
+    endif ()
+    list(APPEND COMPILE_COMMAND "-o")
+    list(APPEND COMPILE_COMMAND ${SHADER_OUTPUT_FILE})
+
+    message(${COMPILE_COMMAND})
+
     add_custom_command(
             OUTPUT ${SHADER_OUTPUT_FILE}
             DEPENDS ${SHADER_SOURCE}
-            COMMAND ${SLANGC_EXECUTABLE} ${SHADER_SOURCE} -target spirv -fvk-use-entrypoint-name -matrix-layout-row-major -o ${SHADER_OUTPUT_FILE}
+            COMMAND ${COMPILE_COMMAND}
             COMMENT "Compiling shader ${SHADER_SOURCE}"
     )
 

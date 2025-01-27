@@ -207,13 +207,16 @@ static bool engine_iterate(engine_t* self) {
 
     double current_timestamp_seconds = nanoseconds_to_seconds(current_timestamp_nanoseconds);
     vector_3f_position_t camera_position = {
-      .x = (float)sin(current_timestamp_seconds), .y = 0.0f, .z = 0.0f};
+      .x = (float)sin(current_timestamp_seconds), .y = 0.0f, .z = 0.2f};
     matrix_4x4f_t view = matrix_4x4f_translate(matrix_4x4f_identity, camera_position);
-    matrix_4x4f_t projection = matrix_4x4f_identity; // TODO
+
+    float aspect_ratio = (float)self->swapchain.extent.width / (float)self->swapchain.extent.height;
+    matrix_4x4f_t projection = matrix_4x4f_projection(20.0f, aspect_ratio, 0.1f, 10.0f);
+
     scene_data_t scene_data = {
       .view = view,
       .projection = projection,
-      .view_projection = matrix_4x4f_multiply(view, projection),
+      .view_projection = matrix_4x4f_multiply(projection, view),
     };
     if (!frame_update_gpu_data(current_frame, &self->render_device, &scene_data)) {
         return false;

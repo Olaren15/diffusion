@@ -26,7 +26,8 @@
         "default"
       ],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "SHADER_DEBUG_INFO": true
       }
     },
     {
@@ -35,7 +36,8 @@
         "default"
       ],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADER_DEBUG_INFO": false
       }
     }
   ],
