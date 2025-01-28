@@ -10,22 +10,26 @@ const uint32_t DEFAULT_WIDTH = 1920;
 const uint32_t DEFAULT_HEIGHT = 1080;
 const uint32_t MAX_FRAME_WAIT_TIME = 10000000; // 1 second
 
-const vertex_t TRIANGLE_VERTICES[] = {
+const vertex_t SQUARE_VERTICES[] = {
   {
-   .position = {.x = 0.0f, .y = -0.5f, .z = 0.0f},
+   .position = {.x = -1.0f, .y = 1.0f, .z = 0.0f},
    .color = {.r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
    },
   {
-   .position = {.x = 0.5f, .y = 0.5f, .z = 0.0f},
+   .position = {.x = 1.0f, .y = 1.0f, .z = 0.0f},
    .color = {.r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f},
    },
   {
-   .position = {.x = -0.5f, .y = 0.5f, .z = 0.0f},
+   .position = {.x = -1.0f, .y = -1.0f, .z = 0.0f},
    .color = {.r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f},
+   },
+  {
+   .position = {.x = 1.0f, .y = -1.0f, .z = 0.0f},
+   .color = {.r = 1.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f},
    }
 };
 
-const uint32_t TRIANGLE_INDICES[] = {0, 1, 2};
+const uint32_t SQUARE_INDICES[] = {0, 1, 2, 1, 3, 2};
 
 /*
  * Do one iteration (frame) worth of stuff
@@ -120,24 +124,23 @@ bool engine_init(engine_t* self) {
         return false;
     }
 
-    mesh_t triangle_mesh = {
+    mesh_t square_mesh = {
       .vertices = dynamic_array_from((slice_t){
-        .first_element = &TRIANGLE_VERTICES,
-        .element_count = 3,
+        .first_element = &SQUARE_VERTICES,
+        .element_count = 4,
         .element_size = sizeof(vertex_t),
       }),
       .indices = dynamic_array_from((slice_t){
-        .first_element = &TRIANGLE_INDICES,
-        .element_count = 3,
+        .first_element = &SQUARE_INDICES,
+        .element_count = 6,
         .element_size = sizeof(uint32_t),
       }),
     };
 
-    gpu_mesh_create(
-      &self->triangle_mesh, &triangle_mesh, &self->render_device, &self->gpu_allocator);
+    gpu_mesh_create(&self->square_mesh, &square_mesh, &self->render_device, &self->gpu_allocator);
 
-    dynamic_array_free(&triangle_mesh.vertices);
-    dynamic_array_free(&triangle_mesh.indices);
+    dynamic_array_free(&square_mesh.vertices);
+    dynamic_array_free(&square_mesh.indices);
 
     return true;
 }
@@ -145,7 +148,7 @@ bool engine_init(engine_t* self) {
 void engine_destroy(engine_t* self) {
     vkDeviceWaitIdle(self->render_device.vk_device);
 
-    gpu_mesh_destroy(&self->triangle_mesh, &self->render_device, &self->gpu_allocator);
+    gpu_mesh_destroy(&self->square_mesh, &self->render_device, &self->gpu_allocator);
 
     triangle_pipeline_destroy(&self->triangle_pipeline, &self->render_device);
 
@@ -206,12 +209,27 @@ static bool engine_iterate(engine_t* self) {
     }
 
     double current_timestamp_seconds = nanoseconds_to_seconds(current_timestamp_nanoseconds);
+
     vector_3f_position_t camera_position = {
-      .x = (float)sin(current_timestamp_seconds), .y = 0.0f, .z = 0.2f};
-    matrix_4x4f_t view = matrix_4x4f_translate(matrix_4x4f_identity, camera_position);
+      .x = (float)(sin(current_timestamp_seconds)), .y = 0.0f, .z = 2.0f};
+    matrix_4x4f_t view = matrix_4x4f_look_at(
+      (vector_3f_t){
+        .position = camera_position
+    },
+      (vector_3f_t){.position =
+                      {
+                        .x = 0.0f,
+                        .y = 0.0f,
+                        .z = 0.0f,
+                      }},
+      (vector_3f_t){.position = {
+                      .x = 0.0f,
+                      .y = 1.0f,
+                      .z = 0.0f,
+                    }});
 
     float aspect_ratio = (float)self->swapchain.extent.width / (float)self->swapchain.extent.height;
-    matrix_4x4f_t projection = matrix_4x4f_projection(20.0f, aspect_ratio, 0.1f, 10.0f);
+    matrix_4x4f_t projection = matrix_4x4f_projection(90.0f, aspect_ratio, 0.1f, 100.0f);
 
     scene_data_t scene_data = {
       .view = view,
@@ -278,7 +296,7 @@ static bool engine_iterate(engine_t* self) {
     vkCmdSetViewport(current_frame->command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(current_frame->command_buffer, 0, 1, &whole_frame_rect);
 
-    gpu_mesh_draw(&self->triangle_mesh, current_frame->command_buffer);
+    gpu_mesh_draw(&self->square_mesh, current_frame->command_buffer);
 
     vkCmdEndRendering(current_frame->command_buffer);
 

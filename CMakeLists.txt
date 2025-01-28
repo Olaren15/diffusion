@@ -23,6 +23,7 @@ add_library(
         src/core/file.c
         src/core/math.c
         src/core/math/matrix4x4.c
+        src/core/math/vector_3.c
         src/core/memory/dynamic_array.c
         src/core/memory/dynamic_array_element_reference.c
         src/core/memory/slice.c

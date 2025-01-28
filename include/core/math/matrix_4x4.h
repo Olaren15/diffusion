@@ -13,6 +13,8 @@ matrix_4x4f_t matrix_4x4f_translate(matrix_4x4f_t matrix, vector_3f_position_t t
 
 matrix_4x4f_t matrix_4x4f_projection(float vertical_fov, float aspect_ratio, float near, float far);
 
+matrix_4x4f_t matrix_4x4f_look_at(vector_3f_t camera_position, vector_3f_t target, vector_3f_t up);
+
 extern const matrix_4x4f_t matrix_4x4f_identity;
 
 #endif // DIFFUSION_INCLUDE_CORE_MATH_MATRIX_4X4_H

@@ -27,7 +27,7 @@ typedef struct engine_s {
     VkDescriptorSetLayout scene_descriptor_set_layout;
     VkDescriptorPool descriptor_pool;
     triangle_pipeline_t triangle_pipeline;
-    gpu_mesh_t triangle_mesh;
+    gpu_mesh_t square_mesh;
 } engine_t;
 
 /**
